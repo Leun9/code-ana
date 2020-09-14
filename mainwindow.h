@@ -15,17 +15,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-private slots:
-    void on_btnSrcPath_clicked();
-    void on_btnDstPath_clicked();
-
 private:
-    void HomologyDetection();
-
     Ui::MainWindow *ui;
-
-    // Homology Analyzer
-    QString homology_src_path_;
-    QString homology_dst_path_;
 };
 #endif // MAINWINDOW_H

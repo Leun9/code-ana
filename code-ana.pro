@@ -13,7 +13,6 @@ SOURCES += \
     mainwindow.cpp
 
 HEADERS += \
-    codeeditor.h \
     mainwindow.h
 
 FORMS += \
