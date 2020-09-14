@@ -27,7 +27,7 @@ Delimiter :
 "{", "}", ";", "(", ")", ",", "<", ">"
 
 notes :
-"//", "/*", "*[/]"
+"//", "[/]*", "*[/]"
 
 other special char:
 " ", "\n"
@@ -45,6 +45,7 @@ other special char:
 
 #define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Lex Ana Error.\n", __FILE__, __LINE__);} while(0);
 
+#define N_KEYWORDS 74
 #define KEYWORDS \
   "asm", "auto", "bool", "break;", "case", "catch", "char", "class", "const", "const_cast", "continue", "default", "delete", \
   "do", "double", "dynamic_cast", "else", "enum", "explicit", "export", "extern", "FALSE", "float", "for", "friend", "goto", \
@@ -54,11 +55,13 @@ other special char:
   "alignas", "alignof", "char16_t", "char32_t", "constexpr", "decltype", "noexpect", "nullptr", "static_assert", "thread_local", \
   "include"
 
+#define N_KEEPCHARS 26
 #define KEEPCHARS \
-  "+", "-", "*", "%", "!", "~", "&", "|", "^", "=", ".", "?", ":", ";", ",", "(", ")", "{", "}", "<", ">", "[", "]", "#"
+  "+", "-", "*", "%", "!", "~", "&", "|", "^", "=", ".", "?", ":", ";", ",", "(", ")", "{", "}", "<", ">", "[", "]", "#", "/", "\\"
 
+#define N_EXTENSION 5
 #define EXTENSION \
-  "CONST_NUM", "CONST_CHAR", "CONST_STR", "ID", "COMMENT"
+  "CONST_NUM_", "CONST_CHAR_", "CONST_STR_", "ID_", "COMMENT_"
 
 using std::initializer_list;
 using std::unordered_set;
@@ -103,12 +106,12 @@ LexicalAnalyzer::Node* LexicalAnalyzer::block_comment2_ = new Node();
 LexicalAnalyzer::Node* LexicalAnalyzer::block_comment3_ = new Node();
 LexicalAnalyzer::Node* LexicalAnalyzer::keep_char_  = new Node();
 
-LexicalAnalyzer::LexicalAnalyzer() {}
+//LexicalAnalyzer::LexicalAnalyzer() {}
 
 // Init DFA
 void LexicalAnalyzer::Init() {
   
-  for (int i = 0; i < decode_.size(); ++i) {
+  for (size_t i = 0; i < decode_.size(); ++i) {
     encode_[decode_[i]] = i;
   }
 
@@ -120,8 +123,8 @@ void LexicalAnalyzer::Init() {
   for (char i = '0'; i <= '9'; ++i) start_->edges[i] = const_num_;
   start_->edges['\''] = const_char_;
   start_->edges['\"'] = const_str_;
-  start_->edges['/'] = slash_;
-  for (string i : keep_chars_) start_->edges[i[0]] = keep_char_;
+  for (string i : keep_chars_) start_->edges[i[0]] = keep_char_; // include slash
+  start_->edges['/'] = slash_; // slash
 
   for (char i = 'a'; i <= 'z'; ++i) id_or_keyword_->edges[i] = id_or_keyword_;
   for (char i = 'A'; i <= 'Z'; ++i) id_or_keyword_->edges[i] = id_or_keyword_;
@@ -157,9 +160,9 @@ void LexicalAnalyzer::Init() {
   block_comment2_->edges['/'] = block_comment3_;
 }
 
-vector<string> LexicalAnalyzer::GetFileTokens(FILE* fp) {
+void LexicalAnalyzer::GetFileTokens(vector<string> &result, FILE* fp) {
+  result.clear();
   Node* now = start_;
-  vector<string> result;
   string line_token;
   string token_buf;
   char ch;
@@ -168,7 +171,7 @@ vector<string> LexicalAnalyzer::GetFileTokens(FILE* fp) {
     if (now->edges.count(ch) != 0) {
       now = now->edges[ch];
       if (now == block_comment_newline_) {
-        //line_token.push_back(encode_["COMMENT"]); // filter comment
+        //line_token.push_back(encode_["COMMENT_"]); // filter comment
         result.push_back(line_token); 
         line_token.clear();
         token_buf.clear();
@@ -191,24 +194,24 @@ vector<string> LexicalAnalyzer::GetFileTokens(FILE* fp) {
       if (keywords_.count(token_buf)) {
         line_token.push_back(encode_[token_buf]);
       } else {
-        line_token.push_back(encode_["ID"]);
+        line_token.push_back(encode_["ID_"]);
       }
     } else if (now == const_num_) {
-      line_token.push_back(encode_["CONST_NUM"]);
+      line_token.push_back(encode_["CONST_NUM_"]);
     } else if (now == const_char_) {
       PRTERROR;
     } else if (now == const_char2_) {
-      line_token.push_back(encode_["CONST_CHAR"]);
+      line_token.push_back(encode_["CONST_CHAR_"]);
     } else if (now == const_str_) {
       PRTERROR;
     } else if (now == const_str2_) {
-      line_token.push_back(encode_["CONST_STR"]);
+      line_token.push_back(encode_["CONST_STR_"]);
     } else if (now == slash_) {
       line_token.push_back(encode_["/"]);
     } else if (now == line_comment_) {
       PRTERROR;
     } else if (now == line_comment2_) {
-      //line_token.push_back(encode_["COMMENT"]); // filter comment
+      //line_token.push_back(encode_["COMMENT_"]); // filter comment
       result.push_back(line_token);
       line_token.clear();
       token_buf.clear();
@@ -224,17 +227,103 @@ vector<string> LexicalAnalyzer::GetFileTokens(FILE* fp) {
     now = start_->edges[ch];
     token_buf = ch;
   } while (ch != EOF);
-  return result;
+  return ;
 }
 
-void LexicalAnalyzer::PrintToken(FILE* fp, vector<string> result) {
+void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str) {
+  result.clear();
+  Node* now = start_;
+  string line_token;
+  string token_buf;
+  char ch;
+  size_t str_size = str.size();
+  for (size_t i = 0; i <= str_size; ++i) {
+    if (i == str_size) ch = 0; else ch = str[i]; // FIXME
+    if (now->edges.count(ch) != 0) {
+      now = now->edges[ch];
+      if (now == block_comment_newline_) {
+        //line_token.push_back(encode_["COMMENT_"]); // filter comment
+        result.push_back(line_token);
+        line_token.clear();
+        token_buf.clear();
+      }
+      token_buf.push_back(ch);
+      continue;
+    }
+    // now->edges.count(ch) == 0
+    // FIXME : token analysis
+    if (now == start_) {
+      PRTERROR;
+    } else if (now == space_) {
+      ; // space : do nothing
+    } else if (now == newline_) {
+      result.push_back(line_token);
+      line_token.clear();
+      token_buf.clear();
+    } else if (now == id_or_keyword_) {
+      //cout << "[" << token_buf << "]";
+      if (keywords_.count(token_buf)) {
+        line_token.push_back(encode_[token_buf]);
+      } else {
+        line_token.push_back(encode_["ID_"]);
+      }
+    } else if (now == const_num_) {
+      line_token.push_back(encode_["CONST_NUM_"]);
+    } else if (now == const_char_) {
+      PRTERROR;
+    } else if (now == const_char2_) {
+      line_token.push_back(encode_["CONST_CHAR_"]);
+    } else if (now == const_str_) {
+      PRTERROR;
+    } else if (now == const_str2_) {
+      line_token.push_back(encode_["CONST_STR_"]);
+    } else if (now == slash_) {
+      line_token.push_back(encode_["/"]);
+    } else if (now == line_comment_) {
+      PRTERROR;
+    } else if (now == line_comment2_) {
+      //line_token.push_back(encode_["COMMENT_"]); // filter comment
+      result.push_back(line_token);
+      line_token.clear();
+      token_buf.clear();
+    } else if (now == block_comment_) {
+      PRTERROR;
+    } else if (now == block_comment2_) {
+      PRTERROR;
+    } else if (now == block_comment3_) {
+      ;// filter comment
+    } else if (now == keep_char_) {
+      line_token.push_back(encode_[token_buf]);
+    }
+    now = start_->edges[ch];
+    token_buf = ch;
+  };
+  result.push_back(line_token);
+  //cout << "result size : " << result.size() << "\n";
+  return ;
+}
+
+void LexicalAnalyzer::PrintTokens(FILE* fp, const vector<string> &result) {
   for (auto &line : result) {
     for (char token : line) {
-      for (char ch : decode_[token]) {
+      for (char &ch : decode_[token]) {
         fputc(ch, fp);
       }
     }
     fputc('\n', fp);
+  }
+}
+
+void LexicalAnalyzer::DecodeTokens(string &str, const vector<string> &result) {
+  // FIXME : str multiple expend
+  //cout << "result size : " << result.size() << "\n";
+  str.clear();
+  for (auto &line : result) {
+    for (char token : line) {
+      str += decode_[token];
+      if (token < N_KEYWORDS) str += " ";
+    }
+    str += "\n";
   }
 }
 

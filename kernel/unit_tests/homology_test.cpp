@@ -22,11 +22,9 @@ size_t len_total;
 int min_size = 6;
 
 void test(FILE* fp0, FILE* fp1) {
-  
-  LexicalAnalyzer lex;
-  lex.Init();
-  src = lex.GetFileTokens(fp0); src_pos.clear();
-  dst = lex.GetFileTokens(fp1); dst_pos.clear();
+  vector<string> src, dst;
+  LexicalAnalyzer::GetFileTokens(src, fp0); src_pos.clear();
+  LexicalAnalyzer::GetFileTokens(dst, fp1); dst_pos.clear();
   cout << src.size() << "\n";
   cout << dst.size() << "\n";
   CalcSimlarity(src, dst, min_size, src_pos, dst_pos, len, len_sum, len_total);
@@ -35,6 +33,7 @@ void test(FILE* fp0, FILE* fp1) {
 }
 
 int main () {
+  LexicalAnalyzer::Init();
   FILE* fp0;
   FILE* fp1 = fopen("data/spn_1.cpp", "r");
   FILE* fp2 = fopen("data/spn_2.cpp", "r");

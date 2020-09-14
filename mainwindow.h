@@ -15,7 +15,11 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private slots:
+    void on_btnLexSrcPath_clicked();
+
 private:
+    QString lex_src_path_;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

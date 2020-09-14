@@ -47,7 +47,7 @@ void CalcSimlarity(vector<string> &src, vector<string> &dst, size_t min_size,  /
       dp[0] = 0;
     }
   }
-  for (size_t i = src_size - 1; i != 0; --i) {
+  for (size_t i = src_size - 1; i > 0; --i) {
     if (dp[i] >= min_size)  {
       //result.push_back(CommonSubStrInfo(i - dp[i] + 1, dst_size - dp[i], dp[i]));
       src_pos.push_back(i - dp[i] + 1);

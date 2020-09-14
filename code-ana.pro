@@ -9,10 +9,14 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    kernel/calc_similarity.cc \
+    kernel/lexical_analyzer.cc \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
+    kernel/calc_similarity.h \
+    kernel/lexical_analyzer.h \
     mainwindow.h
 
 FORMS += \

@@ -24,11 +24,13 @@ class LexicalAnalyzer {
   };
 
  public:
-  LexicalAnalyzer();
-  void Init();
+  //LexicalAnalyzer();
+  static void Init();
   // FIXME : Line-level
-  vector<string> GetFileTokens(FILE*);
-  void PrintToken(FILE*, vector<string>);
+  static void GetFileTokens(vector<string>& result, FILE*);
+  static void GetStringTokens(vector<string>& result, const string&);
+  static void PrintTokens(FILE*, const vector<string>& result);
+  static void DecodeTokens(string &, const vector<string>& result);
 
  private:
   static unordered_set<string> keywords_;
