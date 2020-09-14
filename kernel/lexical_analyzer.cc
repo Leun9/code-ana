@@ -41,6 +41,7 @@ other special char:
 #include <unordered_set>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Lex Ana Error.\n", __FILE__, __LINE__);} while(0);
 

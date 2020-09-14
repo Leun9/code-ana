@@ -11,7 +11,7 @@ using namespace codeana::kernel;
 
 int main () {
   FILE* fp = fopen("data/spn.cpp", "r");
-  FILE* fp_out = fopen("data/lex_ana_out.txt", "w");
+  FILE* fp_out = fopen("data/spn_lex.txt", "w");
   LexicalAnalyzer lex;
   lex.Init();
   auto result = lex.GetFileTokens(fp);
