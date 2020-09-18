@@ -18,6 +18,8 @@ public:
 private slots:
     void on_btnLexSrcPath_clicked();
 
+    void on_btnCfgSrcPath_clicked();
+
 private:
     QString lex_src_path_;
     Ui::MainWindow *ui;

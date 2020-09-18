@@ -5,30 +5,31 @@
 #include <unordered_set>
 #include <string>
 #include <vector>
+#include <utility>
 
 using std::unordered_map;
 using std::unordered_set;
 using std::string;
 using std::vector;
+using std::pair;
 
 namespace codeana {
 namespace kernel {
 
-// TODO : "define" and "typedef"
-// FIXME : cannot great process "typedef" 
+// FIXME : cannot great process "typedef" and "define"
 class LexicalAnalyzer {
  private:
   struct Node {
-    Node() : edges(unordered_map<char, Node*>(256)) {}; 
+    Node() : edges(unordered_map<char, Node*>(256)) {};
     unordered_map<char, Node*> edges;
   };
 
  public:
   //LexicalAnalyzer();
   static void Init();
-  // FIXME : Line-level
-  static void GetFileTokens(vector<string>& result, FILE*);
   static void GetStringTokens(vector<string>& result, const string&);
+  static void GetStringFuncTokens(unordered_map<string, string> &func2tokens, unordered_map<string, pair<size_t, size_t>> func_pos,
+                                  unordered_map<string, vector<string>> &func2subfunc, const string&);
   static void PrintTokens(FILE*, const vector<string>& result);
   static void DecodeTokens(string &, const vector<string>& result);
 
@@ -55,7 +56,7 @@ class LexicalAnalyzer {
   static Node* block_comment_newline_;
   static Node* block_comment2_;
   static Node* block_comment3_;
-  static Node* keep_char_ ;
+  static Node* keep_char_;
 };
 
 } // namespace kernel

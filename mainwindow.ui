@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_2">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <widget class="QWidget" name="pLexAna">
        <layout class="QGridLayout" name="gridLayout">
@@ -50,7 +50,72 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="pHomDet"/>
+      <widget class="QWidget" name="pHomDet">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="leHomSrcPath"/>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QTextEdit" name="teHomSrc"/>
+        </item>
+        <item row="0" column="3">
+         <widget class="QPushButton" name="btnHomDst">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLineEdit" name="leHomDstPath"/>
+        </item>
+        <item row="2" column="2" colspan="2">
+         <widget class="QTextEdit" name="teHomDst"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="btnHomSrc">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QTextEdit" name="textHomInfo"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pCfgExt">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="0">
+         <widget class="QLineEdit" name="leCfgSrcPath"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="btnCfgSrcPath">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <spacer name="horizontalSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>399</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QTextEdit" name="teCfgSrc"/>
+        </item>
+        <item row="1" column="2">
+         <widget class="QTextEdit" name="teCfgSrcInfo"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
