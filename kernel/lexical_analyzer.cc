@@ -185,6 +185,7 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
   size_t str_size = str.size();
   for (size_t i = 0; i <= str_size; ++i) {
     if (i == str_size) ch = 0; else ch = str[i]; // FIXME
+    if (ch == '\t') continue;
     if (now->edges.count(ch) != 0) {
       now = now->edges[ch];
       if (now == block_comment_newline_) {
@@ -267,8 +268,8 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
   return ;
 }
 
-void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2tokens, unordered_map<string, pair<size_t, size_t>> func_pos,
-                                unordered_map<string, vector<string>> &func2subfunc, const string &str) {
+void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2tokens, unordered_map<string, pair<size_t, size_t>> &func_pos,
+                                unordered_map<string, vector<string>> &func2subfunc, string &str) {
     func2tokens.clear();
     func2subfunc.clear();
     Node* now = start_;
@@ -284,8 +285,13 @@ void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2to
     bool in_func = false;
     for (size_t i = 0; i <= str_size; ++i) {
       if (i == str_size) ch = 0; else ch = str[i]; // FIXME
+      if (ch == '\t') continue;
       if (now->edges.count(ch) != 0) {
         now = now->edges[ch];
+        if (now == line_comment_ || now == block_comment_
+                || now == block_comment2_ || now == block_comment3_) { // FIXME : const str
+            str[i] = ' '; // convenient for subsequent detection of functions
+        }
         token_buf.push_back(ch);
         continue;
       }
@@ -365,6 +371,24 @@ void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2to
       now = start_->edges[ch];
       token_buf = ch;
     };
+    for (auto &func_posi : func_pos) {
+        auto func_name = func_posi.first;
+        // qDebug() << QString::fromStdString(func_name);
+        size_t i = func_posi.second.first;
+        auto end = func_posi.second.second;
+        size_t start_temp;
+        vector<string> subfunc;
+        while (i < end) {
+            while (!ISIDCHAR(str[i]) && i < end) ++i;
+            start_temp = i;
+            while (ISIDCHAR(str[i]) && i < end) ++i;
+            if (func_pos.count(str.substr(start_temp, i - start_temp))) {
+                subfunc.push_back(str.substr(start_temp, i - start_temp));
+                // qDebug() << "\t" << QString::fromStdString(str.substr(start_temp, i - start_temp));
+            }
+        }
+        func2subfunc[func_name] = subfunc;
+    }
     return ;
 }
 

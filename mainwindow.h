@@ -17,11 +17,21 @@ public:
 
 private slots:
     void on_btnLexSrcPath_clicked();
-
     void on_btnCfgSrcPath_clicked();
+    void on_actionHomDet_triggered();
+    void on_actionCfgExt_triggered();
+    void on_actionLexAna_triggered();
+
+    void on_btnHomSrc_clicked();
+
+    void on_btnHomDst_clicked();
 
 private:
-    QString lex_src_path_;
+    void HomologyDetection();
+
+private:
     Ui::MainWindow *ui;
+    QString hom_src_;
+    QString hom_dst_;
 };
 #endif // MAINWINDOW_H

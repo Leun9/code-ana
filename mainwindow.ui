@@ -19,6 +19,13 @@
      <widget class="QStackedWidget" name="stackedWidget">
       <widget class="QWidget" name="pLexAna">
        <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1">
+         <widget class="QPushButton" name="btnLexSrcPath">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="0">
          <widget class="QLineEdit" name="leLexSrcPath"/>
         </item>
@@ -35,18 +42,11 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="2" colspan="2">
-         <widget class="QTextEdit" name="teLexSrcToken"/>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="btnLexSrcPath">
-          <property name="text">
-           <string>选择</string>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0" colspan="2">
-         <widget class="QTextEdit" name="teLexSrc"/>
+         <widget class="QTextBrowser" name="teLexSrc"/>
+        </item>
+        <item row="1" column="2" colspan="2">
+         <widget class="QTextBrowser" name="teLexSrcToken"/>
         </item>
        </layout>
       </widget>
@@ -54,9 +54,6 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="0" column="0">
          <widget class="QLineEdit" name="leHomSrcPath"/>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QTextEdit" name="teHomSrc"/>
         </item>
         <item row="0" column="3">
          <widget class="QPushButton" name="btnHomDst">
@@ -68,9 +65,6 @@
         <item row="0" column="2">
          <widget class="QLineEdit" name="leHomDstPath"/>
         </item>
-        <item row="2" column="2" colspan="2">
-         <widget class="QTextEdit" name="teHomDst"/>
-        </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="btnHomSrc">
           <property name="text">
@@ -78,8 +72,14 @@
           </property>
          </widget>
         </item>
+        <item row="2" column="2" colspan="2">
+         <widget class="QTextBrowser" name="teHomDst"/>
+        </item>
+        <item row="2" column="0" colspan="2">
+         <widget class="QTextBrowser" name="teHomSrc"/>
+        </item>
         <item row="2" column="4">
-         <widget class="QTextEdit" name="textHomInfo"/>
+         <widget class="QTextBrowser" name="teHomInfo"/>
         </item>
        </layout>
       </widget>
@@ -102,17 +102,17 @@
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>399</width>
+            <width>349</width>
             <height>20</height>
            </size>
           </property>
          </spacer>
         </item>
         <item row="1" column="0" colspan="2">
-         <widget class="QTextEdit" name="teCfgSrc"/>
+         <widget class="QTextBrowser" name="teCfgSrc"/>
         </item>
         <item row="1" column="2">
-         <widget class="QTextEdit" name="teCfgSrcInfo"/>
+         <widget class="QTextBrowser" name="teCfgSrcInfo"/>
         </item>
        </layout>
       </widget>
@@ -131,6 +131,35 @@
    </property>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>LeftToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionLexAna"/>
+   <addaction name="actionHomDet"/>
+   <addaction name="actionCfgExt"/>
+  </widget>
+  <action name="actionLexAna">
+   <property name="text">
+    <string>词法分析</string>
+   </property>
+  </action>
+  <action name="actionCfgExt">
+   <property name="text">
+    <string>CFG抽取</string>
+   </property>
+  </action>
+  <action name="actionHomDet">
+   <property name="text">
+    <string>同源性检测</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
