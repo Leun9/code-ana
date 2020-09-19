@@ -34,7 +34,7 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
         dp[j] = 0;
         if (dp[j - 1] >= min_size) {
           //result.push_back(CommonSubStrInfo(j - dp[j-1], i - dp[j-1], dp[j-1]));
-          src_pos.push_back(j - dp[j-1]); 
+          src_pos.push_back(j - dp[j-1]);
           dst_pos.push_back(i - dp[j-1]);
           len.push_back(dp[j-1]);
           len_sum += dp[j-1];
@@ -58,6 +58,11 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
   }
   //return result;
   return ;
+}
+
+
+size_t GetFuncSimilarity(string, string) {
+    return 0;
 }
 
 } // namespace kernel

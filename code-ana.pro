@@ -10,12 +10,14 @@ CONFIG += c++11
 
 SOURCES += \
     kernel/calc_similarity.cc \
+    kernel/cfg_dfs.cc \
     kernel/lexical_analyzer.cc \
     main.cpp \
     mainwindow.cpp
 
 HEADERS += \
     kernel/calc_similarity.h \
+    kernel/cfg_dfs.h \
     kernel/lexical_analyzer.h \
     mainwindow.h
 
