@@ -185,6 +185,7 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
   size_t str_size = str.size();
   for (size_t i = 0; i <= str_size; ++i) {
     if (i == str_size) ch = 0; else ch = str[i]; // FIXME
+    //qDebug() << ch;
     if (ch == '\t') continue;
     if (now->edges.count(ch) != 0) {
       now = now->edges[ch];

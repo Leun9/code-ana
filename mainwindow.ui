@@ -20,16 +20,26 @@
       <widget class="QWidget" name="pLexAna">
        <layout class="QGridLayout" name="gridLayout">
         <item row="0" column="1">
+         <widget class="QLineEdit" name="leLexSrcPath"/>
+        </item>
+        <item row="0" column="2">
          <widget class="QPushButton" name="btnLexSrcPath">
           <property name="text">
            <string>选择</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="0">
-         <widget class="QLineEdit" name="leLexSrcPath"/>
+        <item row="1" column="0" colspan="3">
+         <widget class="QTextBrowser" name="teLexSrc"/>
         </item>
-        <item row="0" column="2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>文件:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
          <spacer name="horizontalSpacer">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -42,60 +52,21 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" colspan="2">
-         <widget class="QTextBrowser" name="teLexSrc"/>
-        </item>
-        <item row="1" column="2" colspan="2">
-         <widget class="QTextBrowser" name="teLexSrcToken"/>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="pHomDet">
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="0" column="0">
-         <widget class="QLineEdit" name="leHomSrcPath"/>
-        </item>
         <item row="0" column="3">
-         <widget class="QPushButton" name="btnHomDst">
+         <widget class="QLabel" name="label_9">
           <property name="text">
-           <string>选择</string>
+           <string>词法分析：</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QLineEdit" name="leHomDstPath"/>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="btnHomSrc">
-          <property name="text">
-           <string>选择</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="2" colspan="2">
-         <widget class="QTextBrowser" name="teHomDst"/>
-        </item>
-        <item row="2" column="0" colspan="2">
-         <widget class="QTextBrowser" name="teHomSrc"/>
-        </item>
-        <item row="2" column="4">
-         <widget class="QTextBrowser" name="teHomInfo"/>
+        <item row="1" column="3" colspan="3">
+         <widget class="QTextBrowser" name="teLexSrcToken"/>
         </item>
        </layout>
       </widget>
       <widget class="QWidget" name="pCfgExt">
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QLineEdit" name="leCfgSrcPath"/>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="btnCfgSrcPath">
-          <property name="text">
-           <string>选择</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
+        <item row="0" column="4">
          <spacer name="horizontalSpacer_2">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -108,11 +79,106 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" colspan="2">
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="leCfgSrcPath"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="btnCfgSrcPath">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_6">
+          <property name="text">
+           <string>文件：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>CFG信息:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="3">
          <widget class="QTextBrowser" name="teCfgSrc"/>
         </item>
-        <item row="1" column="2">
+        <item row="1" column="3" colspan="2">
          <widget class="QTextBrowser" name="teCfgSrcInfo"/>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="pHomDet">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="1" column="7">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Token特征对比信息：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="btnHomDst">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="7">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>CFG对比信息:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="btnHomSrc">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLineEdit" name="leHomDstPath"/>
+        </item>
+        <item row="3" column="7">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="7">
+         <widget class="QTextBrowser" name="teHomInfo2"/>
+        </item>
+        <item row="2" column="7">
+         <widget class="QTextBrowser" name="teHomInfo"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="leHomSrcPath"/>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>源文件：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" rowspan="5" colspan="3">
+         <widget class="QTextBrowser" name="teHomSrc"/>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>目标文件：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3" rowspan="5" colspan="3">
+         <widget class="QTextBrowser" name="teHomDst"/>
         </item>
        </layout>
       </widget>
@@ -142,8 +208,8 @@
     <bool>false</bool>
    </attribute>
    <addaction name="actionLexAna"/>
-   <addaction name="actionHomDet"/>
    <addaction name="actionCfgExt"/>
+   <addaction name="actionHomDet"/>
   </widget>
   <action name="actionLexAna">
    <property name="text">
