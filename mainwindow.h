@@ -19,14 +19,14 @@ public:
     ~MainWindow();
 
 signals:
-    void __HomUpdateInfo(QString qstr);
-    void __HomUpdateInfo2(QString qstr);
-    void __HomUpdateTe(QString qstr);
+    void __HomUpdateInfo(const QString &qstr);
+    void __HomUpdateInfo2(const QString &qstr);
+    void __HomUpdateTe(const QString &qstr);
 
 public slots:
-    void HomUpdateInfo(QString qstr);
-    void HomUpdateInfo2(QString qstr);
-    void HomUpdateTe(QString qstr);
+    void HomUpdateInfo(const QString &qstr);
+    void HomUpdateInfo2(const QString &qstr);
+    void HomUpdateTe(const QString &qstr);
 
 private slots:
     void on_btnLexSrcPath_clicked();

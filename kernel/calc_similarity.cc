@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <qDebug>
 
 using std::string;
 using std::vector;
@@ -28,13 +29,14 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
       len.push_back(dp[src_size-1]);
       len_sum += dp[src_size-1];
     }
-    for (size_t j = src_size - 1; j > 0; --j) {
+    for (size_t j = src_size - 1; j != 0; --j) {
       //if (src[j] == "") { // FIXME : 处理空行
       if (dst[i] == src[j]) {
         dp[j] = dp[j - 1] + 1;
       } else {
         dp[j] = 0;
         if (dp[j - 1] >= min_size) {
+          //qDebug() << j;
           //result.push_back(CommonSubStrInfo(j - dp[j-1], i - dp[j-1], dp[j-1]));
           src_pos.push_back(j - dp[j-1]);
           dst_pos.push_back(i - dp[j-1]);

@@ -36,9 +36,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->leLexSrcPath->setReadOnly(true); // TODO : input path in lineEdit
 
     // Connect Signals and Slots
-    QObject::connect(this, SIGNAL(__HomUpdateInfo(QString)), this, SLOT(HomUpdateInfo(QString)));
-    QObject::connect(this, SIGNAL(__HomUpdateInfo2(QString)), this, SLOT(HomUpdateInfo2(QString)));
-    QObject::connect(this, SIGNAL(__HomUpdateTe(QString)), this, SLOT(HomUpdateTe(QString)));
+    QObject::connect(this, SIGNAL(__HomUpdateInfo(const QString&)), this, SLOT(HomUpdateInfo(const QString&)), Qt::BlockingQueuedConnection);
+    QObject::connect(this, SIGNAL(__HomUpdateInfo2(const QString&)), this, SLOT(HomUpdateInfo2(const QString&)), Qt::BlockingQueuedConnection);
+    QObject::connect(this, SIGNAL(__HomUpdateTe(const QString&)), this, SLOT(HomUpdateTe(const QString&)), Qt::BlockingQueuedConnection);
 
     // DEBUG
     ui->stackedWidget->setCurrentIndex(2);
@@ -66,6 +66,10 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
     string src_str = hom_src_.toStdString(); // FIXME
     string dst_str = hom_dst.toStdString();
 
+    QString info_buf = hom_dst_path + ":\n";
+    QString info2_buf = hom_dst_path + ":\n";
+    //if (mode == 1) emit HomUpdateTe(QString("[开始分析]" + hom_dst_path)); // FIXME
+
 /*** 根据token特征计算相似度 ***/
     vector<string> src_tokens, dst_tokens;
     LexicalAnalyzer::GetStringTokens(src_tokens, src_str);
@@ -82,14 +86,12 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
 
     // 调用CalcTokensSimlarity得到长度大于HOM_MINSIZE的相似代码块后，后处理结果，使相似代码块不重叠。
     len_sum = 0;
-    QString info_buf = hom_dst_path + ":\n";
-    QString info2_buf = hom_dst_path + ":\n";
-    QString dst_buf = hom_dst_path + ":\n";
     if (dst_pos.size() != 0) {
-        dst_buf.append("  相似块: \n");
+        info_buf.append("  相似块: \n");
     }
-    vector<pair<size_t, size_t>> temp;
-    for (size_t i = 0; i < dst_pos.size(); ++i) temp.push_back(pair<size_t, size_t>(dst_pos[i], i));
+    vector<pair<pair<size_t, size_t>, size_t>> temp;
+    for (size_t i = 0; i < dst_pos.size(); ++i)
+        temp.push_back(pair< pair<size_t, size_t>, size_t>(pair<size_t, size_t>(dst_pos[i], -len[i]), i));
     sort(temp.begin(), temp.end());
     size_t last_end = 0;
     for (auto &tempi : temp) {
@@ -104,7 +106,7 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         }
         last_end = end;
         len_sum += len[i];
-        dst_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 行数（不计空行）： "+QString::number(len[i])+"\n");
+        info_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 行数： "+QString::number(len[i])+"\n");
     }
     double rate = 0;
     //qDebug() << len_sum << dst_tokens.size();
@@ -112,13 +114,8 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         rate = 100 * ((double)len_sum / len_tot);
     }
     //qDebug() << rate;
-    info_buf.append("  相似度: " + QString::number(rate, 'f', 1) + "%\n\n");
-    dst_buf.append("  相似度: " + QString::number(rate, 'f', 1) + "%\n\n");
+    info_buf.append("  相似度（基于Token）: " + QString::number(rate, 'f', 1) + "%\n\n");
     //qDebug() << hom_dst_path;
-    if (mode == 0) {
-        emit __HomUpdateInfo(dst_buf);
-        dst_buf.clear();
-    }
 
 /*** 根据cfg计算相似度 ***/
     unordered_map<string, string> src_func2tokens, dst_func2tokens;
@@ -130,13 +127,10 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
     if (DfsCfg(src_dfs, src_func2subfunc)) return ; // FIXME : no main
     if (DfsCfg(dst_dfs, dst_func2subfunc)) return ; // FIXME : no main
 
-    if (mode == 0) {
-        emit HomUpdateInfo2(dst_buf);
-    } else {
-        emit __HomUpdateInfo(info_buf);
-        emit __HomUpdateInfo2(info2_buf);
-        emit __HomUpdateTe(dst_buf);
-    }
+    emit __HomUpdateInfo(info_buf);
+    emit __HomUpdateInfo2(info2_buf);
+
+    if (mode == 1) emit __HomUpdateTe(QString("[分析完成] " + hom_dst_path));
 }
 
 void MainWindow::HomologyDetection() {
@@ -149,23 +143,24 @@ void MainWindow::HomologyDetection() {
         thr.detach();
         return ;
     }
+    ui->teHomDst->clear();
     for (auto &path : hom_dst_path_list_) {
-        ui->teHomDst->clear();
+        emit HomUpdateTe(QString("[开始分析]" + path));
         std::thread thr(&MainWindow::HomologyDetectionThread, this, path, 1);
         //qDebug() << path;
         thr.detach();
     }
 }
 
-void MainWindow::HomUpdateInfo(QString qstr) {
+void MainWindow::HomUpdateInfo(const QString &qstr) {
     ui->teHomInfo->append(qstr);
 }
 
-void MainWindow::HomUpdateInfo2(QString qstr) {
+void MainWindow::HomUpdateInfo2(const QString &qstr) {
     ui->teHomInfo2->append(qstr);
 }
 
-void MainWindow::HomUpdateTe(QString qstr) {
+void MainWindow::HomUpdateTe(const QString &qstr) {
     ui->teHomDst->append(qstr);
 }
 
