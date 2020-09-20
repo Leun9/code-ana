@@ -104,12 +104,12 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         }
         last_end = end;
         len_sum += len[i];
-        dst_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 长度： "+QString::number(len[i])+"\n");
+        dst_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 行数（不计空行）： "+QString::number(len[i])+"\n");
     }
     double rate = 0;
     //qDebug() << len_sum << dst_tokens.size();
     if (dst_tokens.size() != 0) {
-        rate = 100 * ((double)len_sum / dst_tokens.size());
+        rate = 100 * ((double)len_sum / len_tot);
     }
     //qDebug() << rate;
     info_buf.append("  相似度: " + QString::number(rate, 'f', 1) + "%\n\n");

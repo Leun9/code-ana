@@ -19,7 +19,8 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
   //vector<CommonSubStrInfo> result;
   vector<size_t> dp(src_size);
   for (size_t i = 0; i < dst_size; ++i) {
-    len_total++;
+    //if (dst[i] == "") continue; // FIXME : 处理空行
+    ++len_total;
     if (dp[src_size - 1] >= min_size) {
       //result.push_back(CommonSubStrInfo(src_size - dp[src_size-1], i - dp[src_size-1], dp[src_size-1]));
       src_pos.push_back(src_size - dp[src_size-1]);
@@ -28,6 +29,7 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
       len_sum += dp[src_size-1];
     }
     for (size_t j = src_size - 1; j > 0; --j) {
+      //if (src[j] == "") { // FIXME : 处理空行
       if (dst[i] == src[j]) {
         dp[j] = dp[j - 1] + 1;
       } else {
