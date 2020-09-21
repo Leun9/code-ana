@@ -10,8 +10,8 @@
 
 namespace TEST {
 /***
- * TEST /*
- * TEST /* 
+ * 1. 将一行的if语句添加花括号
+ * 2. 将所有while语句改写成for语句
  ***/
 }
 
@@ -38,14 +38,14 @@ inline void preprocess() {
     r[s[i]] = i;
     p[i] = 0;
     for (int j = 0; j < 16; ++j) { // FIXME
-      if (pow2[j] & i) p[i] |= pow2[pi_p[j]];
+      if (pow2[j] & i) {p[i] |= pow2[pi_p[j]];}
     }
     q[p[i]] = i;
   }
 }
 inline void preprocess24() {
   int k=0;
-  while (k < 80) {
+  for (; k < 80; ) {
     x[k] = rand()%65536;
     x1[k] = x[k]^0x0b00;
     y[k] = cipher[x[k]];
@@ -55,7 +55,7 @@ inline void preprocess24() {
 }
 inline void preprocess134() {
   int k=0;
-  while (k < 240) {
+  for (; k < 240; ) {
     x[k] = rand()%65536;
     x1[k] = x[k]^0x0f00;
     y[k] = cipher[x[k]];
@@ -98,7 +98,7 @@ int main()
     for (l = 0; l <= 0xff; ++l) {
       u2 = r[(l>>4)^((y[i]&0x0f00)>>8)] ^ r[(l>>4)^((y1_[i]&0x0f00)>>8)];
       u4 = r[(l&0x0f)^(y[i]&0x000f)] ^ r[(l&0x0f)^(y1_[i]&0x000f)];
-      if (!(u2^6) && !(u4^6)) ++cnt[l];
+      if (!(u2^6) && !(u4^6)) {++cnt[l];}
   }
   }
 
@@ -120,7 +120,7 @@ int main()
         u1 = r[(l>>4)^((y[i]&0xf000)>>12)] ^ r[(l>>4)^((y1_[i]&0xf000)>>12)];
         u3 = r[(l&0x0f)^((y[i]&0x00f0)>>4)] ^ r[(l&0x0f)^((y1_[i]&0x00f0)>>4)];
         u4 = r[(maxkey24&0x0f)^(y[i]&0x000f)] ^ r[(maxkey24&0x0f)^(y1_[i]&0x000f)];
-        if (!(u1^6) & !(u3^6) && !(u4^6)) ++cns[l];
+        if (!(u1^6) & !(u3^6) && !(u4^6)) {++cns[l];}
     }
     }
 
@@ -147,14 +147,14 @@ int main()
             if((s[p[s[p[s[p[s[CCC^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[CCC])
               {find = 1; break;}
       }
-      if (find) break;
+      if (find) {break;}
     }
-    if (find) break;
+    if (find) {break;}
     }
   // put key
   for (int i = 7; i >= 0; --i) {
     buf[i] = key & 0xf;
-    if (buf[i] < 10) buf[i] += '0';
+    if (buf[i] < 10) {buf[i] += '0';}
     else buf[i] += 'a' - 10;
     key >>= 4;
   }

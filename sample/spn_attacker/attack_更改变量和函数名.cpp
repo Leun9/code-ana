@@ -10,57 +10,57 @@
 
 namespace TEST {
 /***
- * TEST /*
- * TEST /* 
+ * 1. 更改部分变量名为棍棍（由I、1、l组成）
+ * 2. 更改部分函数名为圈圈（由o、O、0组成）
  ***/
 }
 
 int n;
-int pi_s[] = {0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7}; 
-int pi_p[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15}; // symmetry !
-int pow2[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+int IIIIIIIl[] = {0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7}; 
+int IIIIlllI[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15}; // symmetry !
+int IIllIIll[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
 // spn args
-int x[250], y[250], x1[250], y1_[250];
+int IIllIIlI[250], llllIIlI[250], llIlIIlI[250], lIIlIIlI[250];
 int u1, u2, u3, u4;
 unsigned l;
 int maxkey24, maxkey13, max;
 unsigned key0, key;
 unsigned raw_key;
 int k1, k2, k3, k4, k5;
-int cnt[65536];
-int cns[65536];
-int s[65536], p[65536], r[65536], q[65536];
-int cipher[65536];
+int IIIIIIII[65536];
+int llllllll[65536];
+int llIlllll[65536], lllIllll[65536], lllIllIl[65536], lllIlllI[65536];
+int IIlIlllI[65536];
 
-inline void preprocess() {
+inline void oooooooo() {
   for (int i = 0; i < 65536; ++i) {
-    s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]);
-    r[s[i]] = i;
-    p[i] = 0;
+    llIlllll[i] = (IIIIIIIl[i>>12]<<12) | (IIIIIIIl[(i>>8)&0xf]<<8) | (IIIIIIIl[(i>>4)&0xf]<<4) | (IIIIIIIl[i&0xf]);
+    lllIllIl[llIlllll[i]] = i;
+    lllIllll[i] = 0;
     for (int j = 0; j < 16; ++j) { // FIXME
-      if (pow2[j] & i) p[i] |= pow2[pi_p[j]];
+      if (IIllIIll[j] & i) lllIllll[i] |= IIllIIll[IIIIlllI[j]];
     }
-    q[p[i]] = i;
+    lllIlllI[lllIllll[i]] = i;
   }
 }
-inline void preprocess24() {
+inline void OOOOOOOO() {
   int k=0;
   while (k < 80) {
-    x[k] = rand()%65536;
-    x1[k] = x[k]^0x0b00;
-    y[k] = cipher[x[k]];
-    y1_[k] = cipher[x1[k]];
-    if(!((y[k]^y1_[k])&0xf0f0)) ++k;
+    IIllIIlI[k] = rand()%65536;
+    llIlIIlI[k] = IIllIIlI[k]^0x0b00;
+    llllIIlI[k] = IIlIlllI[IIllIIlI[k]];
+    lIIlIIlI[k] = IIlIlllI[llIlIIlI[k]];
+    if(!((llllIIlI[k]^lIIlIIlI[k])&0xf0f0)) ++k;
   }
 }
-inline void preprocess134() {
+inline void O0O0O0O0() {
   int k=0;
   while (k < 240) {
-    x[k] = rand()%65536;
-    x1[k] = x[k]^0x0f00;
-    y[k] = cipher[x[k]];
-    y1_[k] = cipher[x1[k]];
-    if(!((y[k]^y1_[k])&0x0f00)) ++k;
+    IIllIIlI[k] = rand()%65536;
+    llIlIIlI[k] = IIllIIlI[k]^0x0f00;
+    llllIIlI[k] = IIlIlllI[IIllIIlI[k]];
+    lIIlIIlI[k] = IIlIlllI[llIlIIlI[k]];
+    if(!((llllIIlI[k]^lIIlIIlI[k])&0x0f00)) ++k;
   }
 }
 char buf[16];
@@ -82,23 +82,23 @@ inline int get16bit() {
 
 int main()
 {
-  preprocess();
+  oooooooo();
   int i,j,k;
   scanf("%d",&n);
   getchar();
   for (k = 0; k < n; ++k)
   {
-  for (i = 0; i < 65536; ++i) cipher[i] = get16bit();
+  for (i = 0; i < 65536; ++i) IIlIlllI[i] = get16bit();
   int find = 0;
 
   // first 8 bit
-  preprocess24();
+  OOOOOOOO();
   memset(cnt, 0, 256 * sizeof(int));
   for (i = 0; i < 80; ++i) {
     for (l = 0; l <= 0xff; ++l) {
-      u2 = r[(l>>4)^((y[i]&0x0f00)>>8)] ^ r[(l>>4)^((y1_[i]&0x0f00)>>8)];
-      u4 = r[(l&0x0f)^(y[i]&0x000f)] ^ r[(l&0x0f)^(y1_[i]&0x000f)];
-      if (!(u2^6) && !(u4^6)) ++cnt[l];
+      u2 = lllIllIl[(l>>4)^((llllIIlI[i]&0x0f00)>>8)] ^ lllIllIl[(l>>4)^((lIIlIIlI[i]&0x0f00)>>8)];
+      u4 = lllIllIl[(l&0x0f)^(llllIIlI[i]&0x000f)] ^ lllIllIl[(l&0x0f)^(lIIlIIlI[i]&0x000f)];
+      if (!(u2^6) && !(u4^6)) ++IIIIIIII[l];
   }
   }
 
@@ -107,20 +107,20 @@ int main()
     {
     int max = -1;
     for(l = 0; l <= 0xff; ++l) {
-      if(cnt[l] > max) {
-        max = cnt[l];
+      if(IIIIIIII[l] > max) {
+        max = IIIIIIII[l];
         maxkey24 = l;
     }
     }
-    cnt[maxkey24] = 0;
-    preprocess134();
+    IIIIIIII[maxkey24] = 0;
+    O0O0O0O0();
     memset(cns, 0, 256 * sizeof(int));
     for (i = 0; i < 240; ++i) {
       for (l = 0; l <= 0xff; ++l) {
-        u1 = r[(l>>4)^((y[i]&0xf000)>>12)] ^ r[(l>>4)^((y1_[i]&0xf000)>>12)];
-        u3 = r[(l&0x0f)^((y[i]&0x00f0)>>4)] ^ r[(l&0x0f)^((y1_[i]&0x00f0)>>4)];
-        u4 = r[(maxkey24&0x0f)^(y[i]&0x000f)] ^ r[(maxkey24&0x0f)^(y1_[i]&0x000f)];
-        if (!(u1^6) & !(u3^6) && !(u4^6)) ++cns[l];
+        u1 = lllIllIl[(l>>4)^((llllIIlI[i]&0xf000)>>12)] ^ lllIllIl[(l>>4)^((lIIlIIlI[i]&0xf000)>>12)];
+        u3 = lllIllIl[(l&0x0f)^((llllIIlI[i]&0x00f0)>>4)] ^ lllIllIl[(l&0x0f)^((lIIlIIlI[i]&0x00f0)>>4)];
+        u4 = lllIllIl[(maxkey24&0x0f)^(llllIIlI[i]&0x000f)] ^ lllIllIl[(maxkey24&0x0f)^(lIIlIIlI[i]&0x000f)];
+        if (!(u1^6) & !(u3^6) && !(u4^6)) ++llllllll[l];
     }
     }
 
@@ -129,12 +129,12 @@ int main()
     {
       max = -1;
       for(l = 0; l <= 0xff; ++l) {
-        if(cns[l] > max) {
-          max = cns[l];
+        if(llllllll[l] > max) {
+          max = llllllll[l];
           maxkey13 = l;
       }
       }
-      cns[maxkey13] = 0;
+      llllllll[maxkey13] = 0;
       for (key0 = 0; key0 <= 0xffff; ++key0) {
         key = (key0<<16) | ((maxkey13&0xf0)<<8) | ((maxkey24<<4)&0x0f00) | ((maxkey13&0xf)<<4) | (maxkey24&0xf);
         k5 = key & 0xffff;
@@ -142,9 +142,9 @@ int main()
         k3 = (key>>8) & 0xffff;
         k2 = (key>>12) & 0xffff;
         k1 = (key>>16) & 0xffff;
-        if((s[p[s[p[s[p[s[AAA^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[AAA])
-          if((s[p[s[p[s[p[s[BBB^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[BBB])
-            if((s[p[s[p[s[p[s[CCC^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[CCC])
+        if((llIlllll[lllIllll[llIlllll[lllIllll[llIlllll[lllIllll[llIlllll[AAA^k1]]^k2]]^k3]]^k4] ^ k5) == IIlIlllI[AAA])
+          if((llIlllll[lllIllll[llIlllll[lllIllll[llIlllll[lllIllll[llIlllll[BBB^k1]]^k2]]^k3]]^k4] ^ k5) == IIlIlllI[BBB])
+            if((llIlllll[lllIllll[llIlllll[lllIllll[llIlllll[lllIllll[llIlllll[CCC^k1]]^k2]]^k3]]^k4] ^ k5) == IIlIlllI[CCC])
               {find = 1; break;}
       }
       if (find) break;

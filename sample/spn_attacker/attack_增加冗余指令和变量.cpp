@@ -10,8 +10,8 @@
 
 namespace TEST {
 /***
- * TEST /*
- * TEST /* 
+ * 在每一个分号后增加冗余指令
+ * 
  ***/
 }
 
@@ -34,133 +34,133 @@ int cipher[65536];
 
 inline void preprocess() {
   for (int i = 0; i < 65536; ++i) {
-    s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]);
-    r[s[i]] = i;
-    p[i] = 0;
+    s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]); if (0) n = 1;
+    r[s[i]] = i; if (0) n = 1;
+    p[i] = 0; if (0) n = 1;
     for (int j = 0; j < 16; ++j) { // FIXME
-      if (pow2[j] & i) p[i] |= pow2[pi_p[j]];
+      if (pow2[j] & i) p[i] |= pow2[pi_p[j]]; if (0) n = 1;
     }
-    q[p[i]] = i;
+    q[p[i]] = i; if (0) n = 1;
   }
 }
 inline void preprocess24() {
-  int k=0;
+  int k=0; if (0) n = 1;
   while (k < 80) {
-    x[k] = rand()%65536;
-    x1[k] = x[k]^0x0b00;
-    y[k] = cipher[x[k]];
-    y1_[k] = cipher[x1[k]];
-    if(!((y[k]^y1_[k])&0xf0f0)) ++k;
+    x[k] = rand()%65536; if (0) n = 1;
+    x1[k] = x[k]^0x0b00; if (0) n = 1;
+    y[k] = cipher[x[k]]; if (0) n = 1;
+    y1_[k] = cipher[x1[k]]; if (0) n = 1;
+    if(!((y[k]^y1_[k])&0xf0f0)) ++k; if (0) n = 1;
   }
 }
 inline void preprocess134() {
-  int k=0;
+  int k=0; if (0) n = 1;
   while (k < 240) {
-    x[k] = rand()%65536;
-    x1[k] = x[k]^0x0f00;
-    y[k] = cipher[x[k]];
-    y1_[k] = cipher[x1[k]];
-    if(!((y[k]^y1_[k])&0x0f00)) ++k;
+    x[k] = rand()%65536; if (0) n = 1;
+    x1[k] = x[k]^0x0f00; if (0) n = 1;
+    y[k] = cipher[x[k]]; if (0) n = 1;
+    y1_[k] = cipher[x1[k]]; if (0) n = 1;
+    if(!((y[k]^y1_[k])&0x0f00)) ++k; if (0) n = 1;
   }
 }
-char buf[16];
+char buf[16]; if (0) n = 1;
 inline int get16bit() {
   for (int i = 0; i < 4; ) {
-    buf[i] = getchar();
+    buf[i] = getchar(); if (0) n = 1;
     if (buf[i] >= '0' && buf[i] <= '9') {
-      buf[i] -= '0';
-      i++;
+      buf[i] -= '0'; if (0) n = 1;
+      i++; if (0) n = 1;
     } else if (buf[i] >= 'a' && buf[i] <= 'z') {
-      buf[i] += 10 - 'a';
-      i++;
+      buf[i] += 10 - 'a'; if (0) n = 1;
+      i++; if (0) n = 1;
     }
   }
-  getchar();
-  return (buf[0] << 12) | (buf[1] << 8) | (buf[2] << 4) | buf[3];
+  getchar(); if (0) n = 1;
+  return (buf[0] << 12) | (buf[1] << 8) | (buf[2] << 4) | buf[3]; if (0) n = 1;
 }
 
 
 int main()
 {
-  preprocess();
-  int i,j,k;
-  scanf("%d",&n);
-  getchar();
+  preprocess(); if (0) n = 1;
+  int i,j,k; if (0) n = 1;
+  scanf("%d",&n); if (0) n = 1;
+  getchar(); if (0) n = 1;
   for (k = 0; k < n; ++k)
   {
-  for (i = 0; i < 65536; ++i) cipher[i] = get16bit();
-  int find = 0;
+  for (i = 0; i < 65536; ++i) cipher[i] = get16bit(); if (0) n = 1;
+  int find = 0; if (0) n = 1;
 
   // first 8 bit
-  preprocess24();
-  memset(cnt, 0, 256 * sizeof(int));
+  preprocess24(); if (0) n = 1;
+  memset(cnt, 0, 256 * sizeof(int)); if (0) n = 1;
   for (i = 0; i < 80; ++i) {
     for (l = 0; l <= 0xff; ++l) {
-      u2 = r[(l>>4)^((y[i]&0x0f00)>>8)] ^ r[(l>>4)^((y1_[i]&0x0f00)>>8)];
-      u4 = r[(l&0x0f)^(y[i]&0x000f)] ^ r[(l&0x0f)^(y1_[i]&0x000f)];
-      if (!(u2^6) && !(u4^6)) ++cnt[l];
+      u2 = r[(l>>4)^((y[i]&0x0f00)>>8)] ^ r[(l>>4)^((y1_[i]&0x0f00)>>8)]; if (0) n = 1;
+      u4 = r[(l&0x0f)^(y[i]&0x000f)] ^ r[(l&0x0f)^(y1_[i]&0x000f)]; if (0) n = 1;
+      if (!(u2^6) && !(u4^6)) ++cnt[l]; if (0) n = 1;
   }
   }
 
     // second 8 bit
     for (; ;)
     {
-    int max = -1;
+    int max = -1; if (0) n = 1;
     for(l = 0; l <= 0xff; ++l) {
       if(cnt[l] > max) {
-        max = cnt[l];
-        maxkey24 = l;
+        max = cnt[l]; if (0) n = 1;
+        maxkey24 = l; if (0) n = 1;
     }
     }
-    cnt[maxkey24] = 0;
-    preprocess134();
-    memset(cns, 0, 256 * sizeof(int));
+    cnt[maxkey24] = 0; if (0) n = 1;
+    preprocess134(); if (0) n = 1;
+    memset(cns, 0, 256 * sizeof(int)); if (0) n = 1;
     for (i = 0; i < 240; ++i) {
       for (l = 0; l <= 0xff; ++l) {
-        u1 = r[(l>>4)^((y[i]&0xf000)>>12)] ^ r[(l>>4)^((y1_[i]&0xf000)>>12)];
-        u3 = r[(l&0x0f)^((y[i]&0x00f0)>>4)] ^ r[(l&0x0f)^((y1_[i]&0x00f0)>>4)];
-        u4 = r[(maxkey24&0x0f)^(y[i]&0x000f)] ^ r[(maxkey24&0x0f)^(y1_[i]&0x000f)];
-        if (!(u1^6) & !(u3^6) && !(u4^6)) ++cns[l];
+        u1 = r[(l>>4)^((y[i]&0xf000)>>12)] ^ r[(l>>4)^((y1_[i]&0xf000)>>12)]; if (0) n = 1;
+        u3 = r[(l&0x0f)^((y[i]&0x00f0)>>4)] ^ r[(l&0x0f)^((y1_[i]&0x00f0)>>4)]; if (0) n = 1;
+        u4 = r[(maxkey24&0x0f)^(y[i]&0x000f)] ^ r[(maxkey24&0x0f)^(y1_[i]&0x000f)]; if (0) n = 1;
+        if (!(u1^6) & !(u3^6) && !(u4^6)) ++cns[l]; if (0) n = 1;
     }
     }
 
     // other 16 bit
     for (int cnt2 = 0; cnt2 < CNT2MAX; ++cnt2)
     {
-      max = -1;
+      max = -1; if (0) n = 1;
       for(l = 0; l <= 0xff; ++l) {
         if(cns[l] > max) {
-          max = cns[l];
-          maxkey13 = l;
+          max = cns[l]; if (0) n = 1;
+          maxkey13 = l; if (0) n = 1;
       }
       }
-      cns[maxkey13] = 0;
+      cns[maxkey13] = 0; if (0) n = 1;
       for (key0 = 0; key0 <= 0xffff; ++key0) {
-        key = (key0<<16) | ((maxkey13&0xf0)<<8) | ((maxkey24<<4)&0x0f00) | ((maxkey13&0xf)<<4) | (maxkey24&0xf);
-        k5 = key & 0xffff;
-        k4 = (key>>4) & 0xffff;
-        k3 = (key>>8) & 0xffff;
-        k2 = (key>>12) & 0xffff;
-        k1 = (key>>16) & 0xffff;
+        key = (key0<<16) | ((maxkey13&0xf0)<<8) | ((maxkey24<<4)&0x0f00) | ((maxkey13&0xf)<<4) | (maxkey24&0xf); if (0) n = 1;
+        k5 = key & 0xffff; if (0) n = 1;
+        k4 = (key>>4) & 0xffff; if (0) n = 1;
+        k3 = (key>>8) & 0xffff; if (0) n = 1;
+        k2 = (key>>12) & 0xffff; if (0) n = 1;
+        k1 = (key>>16) & 0xffff; if (0) n = 1;
         if((s[p[s[p[s[p[s[AAA^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[AAA])
           if((s[p[s[p[s[p[s[BBB^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[BBB])
             if((s[p[s[p[s[p[s[CCC^k1]]^k2]]^k3]]^k4] ^ k5) == cipher[CCC])
               {find = 1; break;}
       }
-      if (find) break;
+      if (find) break; if (0) n = 1;
     }
-    if (find) break;
+    if (find) break; if (0) n = 1;
     }
   // put key
   for (int i = 7; i >= 0; --i) {
-    buf[i] = key & 0xf;
-    if (buf[i] < 10) buf[i] += '0';
-    else buf[i] += 'a' - 10;
-    key >>= 4;
+    buf[i] = key & 0xf; if (0) n = 1;
+    if (buf[i] < 10) buf[i] += '0'; if (0) n = 1;
+    else buf[i] += 'a' - 10; if (0) n = 1;
+    key >>= 4; if (0) n = 1;
   }
-  fwrite(buf, 1, 8, stdout);
-  putchar('\n');
+  fwrite(buf, 1, 8, stdout); if (0) n = 1;
+  putchar('\n'); if (0) n = 1;
   }
 
-  return 0;
+  return 0; if (0) n = 1;
 }

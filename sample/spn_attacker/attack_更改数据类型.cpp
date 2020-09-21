@@ -10,41 +10,41 @@
 
 namespace TEST {
 /***
- * TEST /*
- * TEST /* 
+ * 将int改为long
+ * 
  ***/
 }
 
-int n;
-int pi_s[] = {0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7}; 
-int pi_p[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15}; // symmetry !
-int pow2[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
+long n;
+long pi_s[] = {0xe, 0x4, 0xd, 0x1, 0x2, 0xf, 0xb, 0x8, 0x3, 0xa, 0x6, 0xc, 0x5, 0x9, 0x0, 0x7}; 
+long pi_p[] = {0, 4, 8, 12, 1, 5, 9, 13, 2, 6, 10, 14, 3, 7, 11, 15}; // symmetry !
+long pow2[] = {1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768, 65536};
 // spn args
-int x[250], y[250], x1[250], y1_[250];
-int u1, u2, u3, u4;
+long x[250], y[250], x1[250], y1_[250];
+long u1, u2, u3, u4;
 unsigned l;
-int maxkey24, maxkey13, max;
+long maxkey24, maxkey13, max;
 unsigned key0, key;
 unsigned raw_key;
-int k1, k2, k3, k4, k5;
-int cnt[65536];
-int cns[65536];
-int s[65536], p[65536], r[65536], q[65536];
-int cipher[65536];
+long k1, k2, k3, k4, k5;
+long cnt[65536];
+long cns[65536];
+long s[65536], p[65536], r[65536], q[65536];
+long cipher[65536];
 
 inline void preprocess() {
-  for (int i = 0; i < 65536; ++i) {
+  for (long i = 0; i < 65536; ++i) {
     s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]);
     r[s[i]] = i;
     p[i] = 0;
-    for (int j = 0; j < 16; ++j) { // FIXME
+    for (long j = 0; j < 16; ++j) { // FIXME
       if (pow2[j] & i) p[i] |= pow2[pi_p[j]];
     }
     q[p[i]] = i;
   }
 }
 inline void preprocess24() {
-  int k=0;
+  long k=0;
   while (k < 80) {
     x[k] = rand()%65536;
     x1[k] = x[k]^0x0b00;
@@ -54,7 +54,7 @@ inline void preprocess24() {
   }
 }
 inline void preprocess134() {
-  int k=0;
+  long k=0;
   while (k < 240) {
     x[k] = rand()%65536;
     x1[k] = x[k]^0x0f00;
@@ -64,8 +64,8 @@ inline void preprocess134() {
   }
 }
 char buf[16];
-inline int get16bit() {
-  for (int i = 0; i < 4; ) {
+inline long get16bit() {
+  for (long i = 0; i < 4; ) {
     buf[i] = getchar();
     if (buf[i] >= '0' && buf[i] <= '9') {
       buf[i] -= '0';
@@ -80,20 +80,20 @@ inline int get16bit() {
 }
 
 
-int main()
+long main()
 {
   preprocess();
-  int i,j,k;
+  long i,j,k;
   scanf("%d",&n);
   getchar();
   for (k = 0; k < n; ++k)
   {
   for (i = 0; i < 65536; ++i) cipher[i] = get16bit();
-  int find = 0;
+  long find = 0;
 
   // first 8 bit
   preprocess24();
-  memset(cnt, 0, 256 * sizeof(int));
+  memset(cnt, 0, 256 * sizeof(long));
   for (i = 0; i < 80; ++i) {
     for (l = 0; l <= 0xff; ++l) {
       u2 = r[(l>>4)^((y[i]&0x0f00)>>8)] ^ r[(l>>4)^((y1_[i]&0x0f00)>>8)];
@@ -105,7 +105,7 @@ int main()
     // second 8 bit
     for (; ;)
     {
-    int max = -1;
+    long max = -1;
     for(l = 0; l <= 0xff; ++l) {
       if(cnt[l] > max) {
         max = cnt[l];
@@ -114,7 +114,7 @@ int main()
     }
     cnt[maxkey24] = 0;
     preprocess134();
-    memset(cns, 0, 256 * sizeof(int));
+    memset(cns, 0, 256 * sizeof(long));
     for (i = 0; i < 240; ++i) {
       for (l = 0; l <= 0xff; ++l) {
         u1 = r[(l>>4)^((y[i]&0xf000)>>12)] ^ r[(l>>4)^((y1_[i]&0xf000)>>12)];
@@ -125,7 +125,7 @@ int main()
     }
 
     // other 16 bit
-    for (int cnt2 = 0; cnt2 < CNT2MAX; ++cnt2)
+    for (long cnt2 = 0; cnt2 < CNT2MAX; ++cnt2)
     {
       max = -1;
       for(l = 0; l <= 0xff; ++l) {
@@ -152,7 +152,7 @@ int main()
     if (find) break;
     }
   // put key
-  for (int i = 7; i >= 0; --i) {
+  for (long i = 7; i >= 0; --i) {
     buf[i] = key & 0xf;
     if (buf[i] < 10) buf[i] += '0';
     else buf[i] += 'a' - 10;

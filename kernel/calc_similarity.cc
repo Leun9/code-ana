@@ -135,7 +135,6 @@ void CalcStringSimlarity(string &src, string &dst, size_t min_size,  // min_size
 
 
     // 后处理结果，排序并使相似代码块不重叠。
-    qDebug() << len.size();
     vector<pair<pair<size_t, size_t>, size_t>> temp;
     for (size_t i = 0; i < dst_pos.size(); ++i)
         temp.push_back(pair< pair<size_t, size_t>, size_t>(pair<size_t, size_t>(dst_pos[i], -len[i]), i));

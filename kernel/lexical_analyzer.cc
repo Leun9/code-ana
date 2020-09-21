@@ -150,7 +150,7 @@ void LexicalAnalyzer::Init() {
   const_char_->edges['\''] = const_char2_;
 
   // const_str node
-  for (char i = 0x20; i <= 0x7E; ++i) const_str_->edges[i] = const_str_;
+  for (int i = 0; i < 256; ++i) const_str_->edges[i] = const_str_;
   const_str_->edges['\n'] = const_str_;
   const_str_->edges['\"'] = const_str2_;
 
@@ -159,17 +159,17 @@ void LexicalAnalyzer::Init() {
   slash_->edges['*'] = block_comment_;
 
   // line_comment node
-  for (char i = 0x20; i <= 0x7E; ++i) line_comment_->edges[i] = line_comment_;
+  for (int i = 0; i < 256; ++i) line_comment_->edges[i] = line_comment_;
   line_comment_->edges['\n'] = line_comment2_;
 
   // block comment node
-  for (char i = 0x20; i <= 0x7E; ++i) block_comment_->edges[i] = block_comment_;
+  for (int i = 0; i < 256; ++i) block_comment_->edges[i] = block_comment_;
   block_comment_->edges['\n'] = block_comment_newline_;
   block_comment_->edges['*'] = block_comment2_;
-  for (char i = 0x20; i <= 0x7E; ++i) block_comment_newline_->edges[i] = block_comment_;
+  for (int i = 0; i < 256; ++i) block_comment_newline_->edges[i] = block_comment_;
   block_comment_newline_->edges['\n'] = block_comment_newline_;
   block_comment_newline_->edges['*'] = block_comment2_;
-  for (char i = 0x20; i <= 0x7E; ++i) block_comment2_->edges[i] = block_comment_;
+  for (int i = 0; i < 256; ++i) block_comment2_->edges[i] = block_comment_;
   block_comment2_->edges['\n'] = block_comment_newline_;
   block_comment2_->edges['*'] = block_comment2_;
   block_comment2_->edges['/'] = block_comment3_;
