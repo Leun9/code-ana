@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QElapsedTimer>
 
 
 QT_BEGIN_NAMESPACE
@@ -44,6 +45,8 @@ private:
 
 private:
     Ui::MainWindow *ui;
+    size_t hom_timer_cnt_;
+    QElapsedTimer hom_timer_;
     QString hom_src_;
     QStringList hom_dst_path_list_;
 

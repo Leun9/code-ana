@@ -29,6 +29,9 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowState(Qt::WindowMaximized);
 
+    // Copyright
+    statusBar()->addPermanentWidget(new QLabel("Copyright © 2020 u201814846.  ", this));
+
     // Init Lex
     LexicalAnalyzer::Init();
 
@@ -145,6 +148,8 @@ void MainWindow::HomologyDetection() {
         return ;
     }
     ui->teHomDst->clear();
+    hom_timer_.start();
+    hom_timer_cnt_ = hom_dst_path_list_.size() << 1;
     for (auto &path : hom_dst_path_list_) {
         emit HomUpdateTe(QString("[开始分析]" + path));
         std::thread thr(&MainWindow::HomologyDetectionThread, this, path, 1);
@@ -163,6 +168,10 @@ void MainWindow::HomUpdateInfo2(const QString &qstr) {
 
 void MainWindow::HomUpdateTe(const QString &qstr) {
     ui->teHomDst->append(qstr);
+    --hom_timer_cnt_;
+    if (hom_timer_cnt_ == 0) {
+        ui->teHomDst->append("\n分析完毕，耗时" + QString::number(hom_timer_.elapsed()) + "ms。");
+    }
 }
 
 void MainWindow::on_btnLexSrcPath_clicked()

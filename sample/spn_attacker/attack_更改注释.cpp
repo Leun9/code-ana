@@ -80,7 +80,7 @@ inline int get16bit() { // TEST
 } // TEST
  // TEST
  // TEST
-int main() // TEST
+int main() // TEST /*** TEST ***/
 { // TEST
   preprocess(); // TEST
   int i,j,k; // TEST

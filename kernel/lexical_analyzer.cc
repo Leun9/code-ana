@@ -289,9 +289,11 @@ void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2to
       if (ch == '\t') continue;
       if (now->edges.count(ch) != 0) {
         now = now->edges[ch];
-        if (now == line_comment_ || now == block_comment_
-                || now == block_comment2_ || now == block_comment3_) { // FIXME : const str
-            str[i] = ' '; // convenient for subsequent detection of functions
+        if (now == line_comment_ || now == block_comment_ || now == block_comment3_) {
+            str[i] = ' ';
+            str[i-1] = ' ';
+        } else if (now == block_comment2_) {
+            str[i] = ' ';
         }
         token_buf.push_back(ch);
         continue;
