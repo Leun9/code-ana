@@ -8,7 +8,8 @@ QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
 
-const size_t kHOM_MINSIZE = 6;
+const size_t kHOM_TOKENMINSIZE = 6;
+const size_t kHOM_CFGMINSIZE = 64;
 
 class MainWindow : public QMainWindow
 {

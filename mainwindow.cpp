@@ -13,7 +13,6 @@
 #include "kernel/calc_similarity.h"
 #include "kernel/lexical_analyzer.h"
 #include "kernel/cfg_dfs.h"
-#include "kernel/longest_common_subsequence.h"
 
 using std::vector;
 using std::string;
@@ -64,7 +63,6 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
 
     QString info_buf = hom_dst_path + ":\n";
     QString info2_buf = hom_dst_path + ":\n";
-    //if (mode == 1) emit HomUpdateTe(QString("[开始分析]" + hom_dst_path)); // FIXME
 
     /*** 根据token特征计算相似度 ***/
     {
@@ -75,40 +73,25 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         vector<size_t> src_pos;
         vector<size_t> dst_pos;
         vector<size_t> len;
-        size_t len_sum;
-        size_t len_tot;
         //qDebug() << src_tokens.size() << dst_tokens.size();
-        CalcTokensSimlarity(src_tokens, dst_tokens, kHOM_MINSIZE, src_pos, dst_pos, len, len_sum, len_tot);
-        //qDebug() << len_sum << len_tot;
+        CalcTokensSimlarity(src_tokens, dst_tokens, kHOM_TOKENMINSIZE, src_pos, dst_pos, len);
 
-        // 调用CalcTokensSimlarity得到长度大于HOM_MINSIZE的相似代码块后，后处理结果，使相似代码块不重叠。
-        len_sum = 0;
-        if (dst_pos.size() != 0) {
-            info_buf.append("  相似块: \n");
-        }
-        vector<pair<pair<size_t, size_t>, size_t>> temp;
-        for (size_t i = 0; i < dst_pos.size(); ++i)
-            temp.push_back(pair< pair<size_t, size_t>, size_t>(pair<size_t, size_t>(dst_pos[i], -len[i]), i));
-        sort(temp.begin(), temp.end());
-        size_t last_end = 0;
-        for (auto &tempi : temp) {
-            //qDebug() << tempi.first << tempi.second;
-            size_t i = tempi.second;
-            size_t end = dst_pos[i] + len[i];
-            if (last_end > dst_pos[i]) {
-                if (last_end >= end) continue;
-                src_pos[i] += last_end - dst_pos[i];
-                dst_pos[i] = last_end; // dst_pos[i] += last_end - dst_pos[i];
-                len[i] = end - dst_pos[i];
+        size_t len_sum = 0;
+        auto size = dst_pos.size();
+        if (dst_pos.size()) {
+            info_buf.append("  相似代码块: \n");
+            for (size_t i = 0; i < size; ++i) {
+                info_buf.append("    目标文件行: " + QString::number(dst_pos[i] + 1) +
+                                ", 源文件行：" + QString::number(src_pos[i] + 1) +
+                                ", 行数： " + QString::number(len[i]) + "\n");
+                len_sum += len[i];
             }
-            last_end = end;
-            len_sum += len[i];
-            info_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 行数： "+QString::number(len[i])+"\n");
         }
         double rate = 0;
         //qDebug() << len_sum << dst_tokens.size();
-        if (dst_tokens.size() != 0) {
-            rate = 100 * ((double)len_sum / len_tot);
+        if (dst_tokens.size() | src_tokens.size()) {
+            rate = 100 * ((double)(len_sum << 1) / (src_tokens.size() + dst_tokens.size()));
+            if (rate > 100) rate = 100;
         }
         //qDebug() << rate;
         info_buf.append("  相似度（Token）: " + QString::number(rate, 'f', 1) + "%\n\n");
@@ -131,11 +114,16 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         dst_str.clear();
         for (auto &i : src_dfs) src_str.append(src_func2tokens[i]);
         for (auto &i : dst_dfs) dst_str.append(dst_func2tokens[i]);
-        size_t len;
-        LongestCommonSubsequence(src_str, dst_str, len);
+        vector<size_t> src_pos;
+        vector<size_t> dst_pos;
+        vector<size_t> len;
+
+        CalcStringSimlarity(src_str, dst_str, kHOM_CFGMINSIZE, src_pos, dst_pos, len);
+        size_t len_sum = 0;
+        for (auto i : len) len_sum += i;
         double rate = 0;
-        if (dst_str.size() != 0) {
-            rate = 100 * ((double)len / dst_str.size());
+        if (dst_str.size() | src_str.size()) {
+            rate = 100 * ((double) (len_sum << 1) / (src_str.size() + dst_str.size()));
         }
         info2_buf.append("  相似度（CFG）: " + QString::number(rate, 'f', 1) + "%\n\n");
     }

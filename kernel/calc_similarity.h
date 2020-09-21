@@ -11,9 +11,11 @@ namespace codeana {
 namespace kernel {
 
 void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_size,  // min_size >= 2
-  vector<size_t> &src_pos, vector<size_t> &dst_pos, vector<size_t> &len, size_t &len_sum, size_t &len_total);
+  vector<size_t> &src_pos, vector<size_t> &dst_pos, vector<size_t> &len);
 
-size_t GetFuncSimilarity(string, string);
+void CalcStringSimlarity(string &src, string &dst, size_t min_size,  // min_size >= 2
+  vector<size_t> &src_pos, vector<size_t> &dst_pos, vector<size_t> &len);
+
 
 } // namespace kernel
 } // namespace codeana

@@ -12,7 +12,6 @@ SOURCES += \
     kernel/calc_similarity.cc \
     kernel/cfg_dfs.cc \
     kernel/lexical_analyzer.cc \
-    kernel/longest_common_subsequence.cc \
     main.cpp \
     mainwindow.cpp
 
@@ -20,7 +19,6 @@ HEADERS += \
     kernel/calc_similarity.h \
     kernel/cfg_dfs.h \
     kernel/lexical_analyzer.h \
-    kernel/longest_common_subsequence.h \
     mainwindow.h
 
 FORMS += \
