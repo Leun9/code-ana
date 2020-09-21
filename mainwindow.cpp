@@ -13,6 +13,7 @@
 #include "kernel/calc_similarity.h"
 #include "kernel/lexical_analyzer.h"
 #include "kernel/cfg_dfs.h"
+#include "kernel/longest_common_subsequence.h"
 
 using std::vector;
 using std::string;
@@ -57,75 +58,87 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         return ;
     }
 
-    QString hom_dst = hom_dst_file.readAll();
+    string dst_str = hom_dst_file.readAll().toStdString();
     hom_dst_file.close();
-
-    if (hom_dst.isEmpty()) return;
-    if (hom_src_.isEmpty()) return;
-    // GetTokens & setText
     string src_str = hom_src_.toStdString(); // FIXME
-    string dst_str = hom_dst.toStdString();
 
     QString info_buf = hom_dst_path + ":\n";
     QString info2_buf = hom_dst_path + ":\n";
     //if (mode == 1) emit HomUpdateTe(QString("[开始分析]" + hom_dst_path)); // FIXME
 
-/*** 根据token特征计算相似度 ***/
-    vector<string> src_tokens, dst_tokens;
-    LexicalAnalyzer::GetStringTokens(src_tokens, src_str);
-    LexicalAnalyzer::GetStringTokens(dst_tokens, dst_str);
+    /*** 根据token特征计算相似度 ***/
+    {
+        vector<string> src_tokens, dst_tokens;
+        LexicalAnalyzer::GetStringTokens(src_tokens, src_str);
+        LexicalAnalyzer::GetStringTokens(dst_tokens, dst_str);
 
-    vector<size_t> src_pos;
-    vector<size_t> dst_pos;
-    vector<size_t> len;
-    size_t len_sum;
-    size_t len_tot;
-    //qDebug() << src_tokens.size() << dst_tokens.size();
-    CalcTokensSimlarity(src_tokens, dst_tokens, kHOM_MINSIZE, src_pos, dst_pos, len, len_sum, len_tot);
-    //qDebug() << len_sum << len_tot;
+        vector<size_t> src_pos;
+        vector<size_t> dst_pos;
+        vector<size_t> len;
+        size_t len_sum;
+        size_t len_tot;
+        //qDebug() << src_tokens.size() << dst_tokens.size();
+        CalcTokensSimlarity(src_tokens, dst_tokens, kHOM_MINSIZE, src_pos, dst_pos, len, len_sum, len_tot);
+        //qDebug() << len_sum << len_tot;
 
-    // 调用CalcTokensSimlarity得到长度大于HOM_MINSIZE的相似代码块后，后处理结果，使相似代码块不重叠。
-    len_sum = 0;
-    if (dst_pos.size() != 0) {
-        info_buf.append("  相似块: \n");
-    }
-    vector<pair<pair<size_t, size_t>, size_t>> temp;
-    for (size_t i = 0; i < dst_pos.size(); ++i)
-        temp.push_back(pair< pair<size_t, size_t>, size_t>(pair<size_t, size_t>(dst_pos[i], -len[i]), i));
-    sort(temp.begin(), temp.end());
-    size_t last_end = 0;
-    for (auto &tempi : temp) {
-        //qDebug() << tempi.first << tempi.second;
-        size_t i = tempi.second;
-        size_t end = dst_pos[i] + len[i];
-        if (last_end > dst_pos[i]) {
-            if (last_end >= end) continue;
-            src_pos[i] += last_end - dst_pos[i];
-            dst_pos[i] = last_end; // dst_pos[i] += last_end - dst_pos[i];
-            len[i] = end - dst_pos[i];
+        // 调用CalcTokensSimlarity得到长度大于HOM_MINSIZE的相似代码块后，后处理结果，使相似代码块不重叠。
+        len_sum = 0;
+        if (dst_pos.size() != 0) {
+            info_buf.append("  相似块: \n");
         }
-        last_end = end;
-        len_sum += len[i];
-        info_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 行数： "+QString::number(len[i])+"\n");
+        vector<pair<pair<size_t, size_t>, size_t>> temp;
+        for (size_t i = 0; i < dst_pos.size(); ++i)
+            temp.push_back(pair< pair<size_t, size_t>, size_t>(pair<size_t, size_t>(dst_pos[i], -len[i]), i));
+        sort(temp.begin(), temp.end());
+        size_t last_end = 0;
+        for (auto &tempi : temp) {
+            //qDebug() << tempi.first << tempi.second;
+            size_t i = tempi.second;
+            size_t end = dst_pos[i] + len[i];
+            if (last_end > dst_pos[i]) {
+                if (last_end >= end) continue;
+                src_pos[i] += last_end - dst_pos[i];
+                dst_pos[i] = last_end; // dst_pos[i] += last_end - dst_pos[i];
+                len[i] = end - dst_pos[i];
+            }
+            last_end = end;
+            len_sum += len[i];
+            info_buf.append("    目标文件行: "+QString::number(dst_pos[i]+1)+", 源文件行："+QString::number(src_pos[i]+1)+", 行数： "+QString::number(len[i])+"\n");
+        }
+        double rate = 0;
+        //qDebug() << len_sum << dst_tokens.size();
+        if (dst_tokens.size() != 0) {
+            rate = 100 * ((double)len_sum / len_tot);
+        }
+        //qDebug() << rate;
+        info_buf.append("  相似度（Token）: " + QString::number(rate, 'f', 1) + "%\n\n");
+        //qDebug() << hom_dst_path;
     }
-    double rate = 0;
-    //qDebug() << len_sum << dst_tokens.size();
-    if (dst_tokens.size() != 0) {
-        rate = 100 * ((double)len_sum / len_tot);
-    }
-    //qDebug() << rate;
-    info_buf.append("  相似度（基于Token）: " + QString::number(rate, 'f', 1) + "%\n\n");
-    //qDebug() << hom_dst_path;
 
-/*** 根据cfg计算相似度 ***/
-    unordered_map<string, string> src_func2tokens, dst_func2tokens;
-    unordered_map<string, pair<size_t, size_t>> src_func_pos, dst_func_pos;
-    unordered_map<string, vector<string>> src_func2subfunc, dst_func2subfunc;
-    LexicalAnalyzer::GetStringFuncTokens(src_func2tokens, src_func_pos, src_func2subfunc, src_str);
-    LexicalAnalyzer::GetStringFuncTokens(dst_func2tokens, dst_func_pos, dst_func2subfunc, dst_str);
-    vector<string> src_dfs, dst_dfs;
-    if (DfsCfg(src_dfs, src_func2subfunc)) return ; // FIXME : no main
-    if (DfsCfg(dst_dfs, dst_func2subfunc)) return ; // FIXME : no main
+
+    /*** 根据cfg计算相似度 ***/
+    {
+        unordered_map<string, string> src_func2tokens, dst_func2tokens;
+        unordered_map<string, pair<size_t, size_t>> src_func_pos, dst_func_pos;
+        unordered_map<string, vector<string>> src_func2subfunc, dst_func2subfunc;
+        LexicalAnalyzer::GetStringFuncTokens(src_func2tokens, src_func_pos, src_func2subfunc, src_str);
+        LexicalAnalyzer::GetStringFuncTokens(dst_func2tokens, dst_func_pos, dst_func2subfunc, dst_str);
+        vector<string> src_dfs, dst_dfs;
+        if (DfsCfg(src_dfs, src_func2subfunc)) return ; // FIXME : no main
+        if (DfsCfg(dst_dfs, dst_func2subfunc)) return ; // FIXME : no main
+
+        src_str.clear();
+        dst_str.clear();
+        for (auto &i : src_dfs) src_str.append(src_func2tokens[i]);
+        for (auto &i : dst_dfs) dst_str.append(dst_func2tokens[i]);
+        size_t len;
+        LongestCommonSubsequence(src_str, dst_str, len);
+        double rate = 0;
+        if (dst_str.size() != 0) {
+            rate = 100 * ((double)len / dst_str.size());
+        }
+        info2_buf.append("  相似度（CFG）: " + QString::number(rate, 'f', 1) + "%\n\n");
+    }
 
     emit __HomUpdateInfo(info_buf);
     emit __HomUpdateInfo2(info2_buf);

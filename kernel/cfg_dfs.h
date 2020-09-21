@@ -1,5 +1,5 @@
-#ifndef CODEANA_KERNEL_CFG_DFS_H
-#define CODEANA_KERNEL_CFG_DFS_H
+#ifndef CODEANA_KERNEL_CFG_DFS_H_
+#define CODEANA_KERNEL_CFG_DFS_H_
 
 #include <vector>
 #include <string>
@@ -17,4 +17,4 @@ namespace kernel {
 }
 }
 
-#endif // CFG_DFS_H
+#endif // CODEANA_KERNEL_CFG_DFS_H_

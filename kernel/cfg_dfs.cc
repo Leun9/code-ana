@@ -32,6 +32,7 @@ int DfsCfg(vector<string> &result, unordered_map<string, vector<string>> &func2s
     if (func2subfunc.count("main") == 0) { // FIXME
         return 1;
     }
+    result.push_back("main");
     Dfs(result, "main", func2subfunc);
     return 0;
 }

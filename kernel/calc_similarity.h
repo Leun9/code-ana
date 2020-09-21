@@ -1,5 +1,5 @@
-#ifndef CODEANA_KERNEL_UTILS_CALC_SIMILARITY_H_
-#define CODEANA_KERNEL_UTILS_CALC_SIMILARITY_H_
+#ifndef CODEANA_KERNEL_CALC_SIMILARITY_H_
+#define CODEANA_KERNEL_CALC_SIMILARITY_H_
 
 #include <string>
 #include <vector>
@@ -19,4 +19,4 @@ size_t GetFuncSimilarity(string, string);
 } // namespace codeana
 
 
-#endif // CODEANA_KERNEL_UTILS_CALC_SIMILARITY_H_
+#endif // CODEANA_KERNEL_CALC_SIMILARITY_H_
