@@ -2,13 +2,14 @@
 
 bool v0;
 int v1;
-char v2;
+char v2[] = "hello\n";
 short v3;
 long v4;
 long long v5;
 double v6;
 float v7;
 unsigned long long v8;
+char v9[100];
 
 void f1() {
 }

@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <iostream>
 #include <unordered_set>
+#include <QDebug>
 
 using std::string;
 using std::vector;
@@ -16,8 +17,9 @@ namespace codeana {
 namespace kernel {
 
 #define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Func Scan Error.\n", __FILE__, __LINE__);} while(0);
-#define ISIDCHAR(x) ((x <= '9' && x >= '0') || (x <= 'z' && x >= 'a') || (x <= 'Z' && x >= 'A') || (x == '_'))
-#define ISBLANK(x) ((x == '\n') || (x == '\t') || (x == ' '))
+
+bool ISIDCHAR(char x) {return ((x <= '9' && x >= '0') || (x <= 'z' && x >= 'a') || (x <= 'Z' && x >= 'A') || (x == '_'));}
+bool ISBLANK(char x) {return ((x == '\n') || (x == '\t') || (x == ' '));}
 
 unordered_map<string, int> type2size({{"void", 0}, {"bool", 1}, {"char", 1}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
 unordered_set<string> integer({"short", "int", "long", "long long"});
@@ -57,8 +59,10 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
 
         } else if (str[i] == '}') { // 压入函数信息
             --deep;
+            //qDebug() << "deep" << deep;
             // 处理变量的end
-            for (auto it = func_info.value_infos_.rend(); it != func_info.value_infos_.rbegin(); --it) {
+            for (auto it = func_info.value_infos_.rbegin(); it != func_info.value_infos_.rend(); ++it) {
+                //qDebug() << it->name_.c_str() << it->deep_;
                 if (it->deep_ == deep) break;
                 if (it->deep_ == deep + 1) it->end_ = i;
             }
@@ -109,7 +113,8 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
                 while (ISIDCHAR(str[i])) ++i;
                 string name(str.substr(start, i - start));
                 while (ISBLANK(str[i])) ++i;
-                if (str[i] == '(') { // 函数声明 or 实现
+                if (str[i] == '(') {
+/*** 函数声明 or 实现 ***/
 if (deep == 0)  {
     func_info.name_ = name;
     func_info.start_ = start; // FIXME : start
@@ -129,7 +134,7 @@ if (deep == 0)  {
             type = str.substr(type_start, v_start - type_start + 1);
 
             // std::cout << "[" << type << "] " << name << "\n";
-            func_info.value_infos_.push_back(ValueInfo(name, start, 0, 1, unsign, type, size, isp, isa, 0));
+            func_info.value_infos_.push_back(ValueInfo(name, start, code_size-1, 1, unsign, type, size, isp, isa, 0));
             if (str[i] == ')') break;
         }
     }
@@ -141,15 +146,34 @@ if (str[i] == '{') { // 实现
 } else { // 否则是声明
     while (func_info.value_infos_.back().deep_ == 1) func_info.value_infos_.pop_back();
 }
+/*** end 处理函数声明 or 实现 ***/
                     break;
                 }
-                if (str[i] == '[') {isa = 1; do {++i;} while (str[i] != ']');}
+                size_t len = 0;
+                if (str[i] == '[') { // 得到长度
+                    isa = 1;
+                    do {++i;} while (ISBLANK(str[i]));
+                    if (str[i] == ']') { // []
+                        while (str[i] != '=') ++i;
+                        do {++i;} while (str[i] != '"' && str[i] != '{');
+                        if (str[i] == '{') {
+                            while (str[i] != '}') {if (str[i] == ',') ++len; ++i;}
+                            ++len;
+                        } else { // str[i] == " , 字符串常量
+                            do {++i; if (str[i] == '\\') ++i; ++len;} while (str[i] != '"');
+                            ++i;
+                        }
+                    } else { // [len]
+                        while (str[i] >= '0' && str[i] <= '9') {len *= 10; len += str[i] - '0'; ++i;};
+                        while (ISBLANK(str[i])) ++i;
+                    }
+                }
 
                 // std::cout << "[" << type << "] " << name << "\n";
-                //// std::cout << i << str[i] << "\n";
+                // std::cout << i << str[i] << "\n";
 
-                size_t end; if (deep) end = 0; else end = code_size - 1; // 全局变量：end = str_size - 1
-                func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign, type, size, isp, isa, 0));
+                size_t end = code_size - 1; // 全局变量：end = str_size - 1
+                func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign, type, size, isp, isa, len));
                 while (str[i] != ',' && str[i] != ';' && str[i] != '\"' && str[i] != '{') ++i;
                 if (str[i] == '{') {
                     do {++i;} while (str[i] != '}');

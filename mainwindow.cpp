@@ -405,6 +405,7 @@ void MainWindow::on_btnFunPath_clicked()
         for (auto &v : global_values) {
             ui->teFuncRes->append("  [变量]\t" + S2QS(v.name_) );
             ui->teFuncRes->append("  类型：\t" + S2QS(v.type_));
+            ui->teFuncRes->append("  长度：  \t" + NUM2QS(v.len_));   // FIXME
             ui->teFuncRes->append("  作用域起始偏移：\t" + NUM2QS(v.start_));
             ui->teFuncRes->append("  作用域末尾偏移：\t" + NUM2QS(v.end_));
             ui->teFuncRes->append("  代码块深度：\t" + NUM2QS(v.deep_) + "\n");
@@ -421,6 +422,7 @@ void MainWindow::on_btnFunPath_clicked()
                 if (v.deep_ == 0) continue;
                 ui->teFuncRes->append("    [变量] \t" + S2QS(v.name_) );
                 ui->teFuncRes->append("    类型：  \t" + S2QS(v.type_));
+                ui->teFuncRes->append("    长度：  \t" + NUM2QS(v.len_));   // FIXME
                 ui->teFuncRes->append("    作用域起始偏移：\t" + NUM2QS(v.start_));
                 ui->teFuncRes->append("    作用域末尾偏移：\t" + NUM2QS(v.end_));
                 ui->teFuncRes->append("    代码块深度：\t" + NUM2QS(v.deep_) + "\n");
