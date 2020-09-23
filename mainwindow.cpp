@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QFileDialog>
 #include <QTextStream>
+#include <QFont>
 #include <thread>
 #include "kernel/calc_similarity.h"
 #include "kernel/lexical_analyzer.h"
@@ -30,7 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
     setWindowState(Qt::WindowMaximized);
 
     // Copyright
-    statusBar()->addPermanentWidget(new QLabel("Copyright © 2020 u201814846.  ", this));
+    statusBar()->addPermanentWidget(new QLabel("Copyright © 2020 u201814846.    ", this));
 
     // Init Lex
     LexicalAnalyzer::Init();
