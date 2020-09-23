@@ -38,6 +38,8 @@ private slots:
     void on_actionLexAna_triggered();
     void on_btnHomSrc_clicked();
     void on_btnHomDst_clicked();
+    void on_actionFuncScan_triggered();
+    void on_btnFunPath_clicked();
 
 private:
     void HomologyDetectionThread(QString hom_dst_path, int mode);

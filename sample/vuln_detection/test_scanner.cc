@@ -11,8 +11,6 @@ float v7;
 unsigned long long v8;
 
 void f1() {
-  int v11   =   0 , v12=0, 
-  * v13, *v14 = NULL, v15   [   100   ]   , v16[] = {0};
 }
 
 int f2() {
@@ -24,7 +22,7 @@ unsigned long long f3() {
 }
 
 
-int main(int argc, char * argv [] ) {
-
+int main(int argc, char *argv[]) {
+  {int i; {long i; {short i;}}}
   return 0;
 }

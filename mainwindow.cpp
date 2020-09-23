@@ -14,6 +14,10 @@
 #include "kernel/calc_similarity.h"
 #include "kernel/lexical_analyzer.h"
 #include "kernel/cfg_dfs.h"
+#include "kernel/func_scanner.h"
+
+#define S2QS(x) (QString::fromStdString(x))
+#define NUM2QS(...) (QString::number(__VA_ARGS__))
 
 using std::vector;
 using std::string;
@@ -45,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(this, SIGNAL(__HomUpdateTe(const QString&)), this, SLOT(HomUpdateTe(const QString&)), Qt::BlockingQueuedConnection);
 
     // DEBUG
-    ui->stackedWidget->setCurrentIndex(2);
+    ui->stackedWidget->setCurrentIndex(3);
 
 }
 
@@ -85,9 +89,9 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         if (dst_pos.size()) {
             info_buf.append("  相似代码块: \n");
             for (size_t i = 0; i < size; ++i) {
-                info_buf.append("    目标文件行: " + QString::number(dst_pos[i] + 1) +
-                                ", 源文件行：" + QString::number(src_pos[i] + 1) +
-                                ", 行数： " + QString::number(len[i]) + "\n");
+                info_buf.append("    目标文件行: " + NUM2QS(dst_pos[i] + 1) +
+                                ", 源文件行：" + NUM2QS(src_pos[i] + 1) +
+                                ", 行数： " + NUM2QS(len[i]) + "\n");
                 len_sum += len[i];
             }
         }
@@ -98,7 +102,7 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
             if (rate > 100) rate = 100;
         }
         //qDebug() << rate;
-        info_buf.append("  相似度（Token）: " + QString::number(rate, 'f', 1) + "%\n\n");
+        info_buf.append("  相似度（Token）: " + NUM2QS(rate, 'f', 1) + "%\n\n");
         //qDebug() << hom_dst_path;
     }
 
@@ -129,7 +133,7 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         if (dst_str.size() | src_str.size()) {
             rate = 100 * ((double) (len_sum << 1) / (src_str.size() + dst_str.size()));
         }
-        info2_buf.append("  相似度（CFG）: " + QString::number(rate, 'f', 1) + "%\n\n");
+        info2_buf.append("  相似度（CFG）: " + NUM2QS(rate, 'f', 1) + "%\n\n");
     }
 
     emit __HomUpdateInfo(info_buf);
@@ -171,7 +175,7 @@ void MainWindow::HomUpdateTe(const QString &qstr) {
     ui->teHomDst->append(qstr);
     --hom_timer_cnt_;
     if (hom_timer_cnt_ == 0) {
-        ui->teHomDst->append("\n分析完毕，耗时" + QString::number(hom_timer_.elapsed()) + "ms。");
+        ui->teHomDst->append("\n分析完毕，耗时" + NUM2QS(hom_timer_.elapsed()) + "ms。");
     }
 }
 
@@ -208,7 +212,7 @@ void MainWindow::on_btnLexSrcPath_clicked()
     string tokens_decode;
     LexicalAnalyzer::GetStringTokens(tokens, src_str);
     LexicalAnalyzer::DecodeTokens(tokens_decode, tokens);
-    ui->teLexSrcToken->setText(QString::fromStdString(tokens_decode));
+    ui->teLexSrcToken->setText(S2QS(tokens_decode));
     return ;
 }
 
@@ -251,14 +255,14 @@ void MainWindow::on_btnCfgSrcPath_clicked()
         size_t end = func_pos["main"].second;
         ui->teCfgSrcInfo->append("\n");
         ui->teCfgSrcInfo->append("[MAIN]:\tmain");
-        ui->teCfgSrcInfo->append("起始偏移:\t" + QString::number(start));
-        ui->teCfgSrcInfo->append("末尾偏移:\t" + QString::number(end));
+        ui->teCfgSrcInfo->append("起始偏移:\t" + NUM2QS(start));
+        ui->teCfgSrcInfo->append("末尾偏移:\t" + NUM2QS(end));
         if (subfunc.empty()) {
             ui->teCfgSrcInfo->append("无调用函数");
         } else {
             ui->teCfgSrcInfo->append("调用函数（顺序排列）:");
             for (auto &j : subfunc) {
-                ui->teCfgSrcInfo->append("\t    " + QString::fromStdString(j));
+                ui->teCfgSrcInfo->append("\t    " + S2QS(j));
             }
         }
     }
@@ -269,15 +273,15 @@ void MainWindow::on_btnCfgSrcPath_clicked()
         size_t start = func_pos[func_name].first;
         size_t end = func_pos[func_name].second;
         ui->teCfgSrcInfo->append("\n");
-        ui->teCfgSrcInfo->append("[FUNC]:\t" + QString::fromStdString(func_name));
-        ui->teCfgSrcInfo->append("起始偏移:\t" + QString::number(start));
-        ui->teCfgSrcInfo->append("末尾偏移:\t" + QString::number(end));
+        ui->teCfgSrcInfo->append("[FUNC]:\t" + S2QS(func_name));
+        ui->teCfgSrcInfo->append("起始偏移:\t" + NUM2QS(start));
+        ui->teCfgSrcInfo->append("末尾偏移:\t" + NUM2QS(end));
         if (subfunc.empty()) {
             ui->teCfgSrcInfo->append("无调用函数");
         } else {
             ui->teCfgSrcInfo->append("调用函数（顺序排列）:");
             for (auto &j : subfunc) {
-                ui->teCfgSrcInfo->append("\t    " + QString::fromStdString(j));
+                ui->teCfgSrcInfo->append("\t    " + S2QS(j));
             }
         }
     }
@@ -355,5 +359,76 @@ void MainWindow::on_btnHomDst_clicked()
         ui->teHomDst->setText(hom_dst_path_list_.join("\n"));
     }
     HomologyDetection();
+    return ;
+}
+
+void MainWindow::on_actionFuncScan_triggered()
+{
+    ui->stackedWidget->setCurrentIndex(3);
+}
+
+
+
+void MainWindow::on_btnFunPath_clicked()
+{
+    QFileDialog *fileDialog = new QFileDialog(this); // 定义文件对话框类
+    fileDialog->setWindowTitle(QStringLiteral("选中文件")); // 定义文件对话框标题
+    fileDialog->setDirectory(".");  // 设置默认文件路径
+    fileDialog->setNameFilter(tr("File(*.*)")); // 设置文件过滤器
+    //fileDialog->setFileMode(QFileDialog::ExistingFiles); // 设置可以选择多个文件,默认为只能选择一个文件QFileDialog::ExistingFiles
+    fileDialog->setViewMode(QFileDialog::Detail); // 设置视图模式
+    QStringList fileNames;
+    if (fileDialog->exec()) {
+        fileNames = fileDialog->selectedFiles();
+    } else {
+        return ;
+    }
+    QString func_src_path(fileNames[0]);
+    ui->leFuncPath->setText(func_src_path);
+    QFile func_src_file(func_src_path);
+    if (!func_src_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // TODO : Warn & Update StatusBar
+        return;
+    }
+    QString qstr = func_src_file.readAll();
+    ui->teFuncSrc->setText(qstr);
+    auto str = qstr.toStdString();
+    func_src_file.close();
+
+    FuncInfos func_infos;
+    ValueInfos global_values;
+    GetFuncInfos(func_infos, global_values, str);
+
+    ui->teFuncRes->clear();
+    if (!global_values.empty()) {
+        ui->teFuncRes->append("[全局变量]：\n");
+        for (auto &v : global_values) {
+            ui->teFuncRes->append("  [变量]\t" + S2QS(v.name_) );
+            ui->teFuncRes->append("  类型：\t" + S2QS(v.type_));
+            ui->teFuncRes->append("  作用域起始偏移：\t" + NUM2QS(v.start_));
+            ui->teFuncRes->append("  作用域末尾偏移：\t" + NUM2QS(v.end_));
+            ui->teFuncRes->append("  代码块深度：\t" + NUM2QS(v.deep_) + "\n");
+        }
+    }
+
+    for (auto func : func_infos) {
+        ui->teFuncRes->append("\n[Func]\t" + S2QS(func.name_));
+        ui->teFuncRes->append("  起始偏移：\t" + NUM2QS(func.start_));
+        ui->teFuncRes->append("  末尾偏移：\t" + NUM2QS(func.end_));
+        if (!func.value_infos_.empty()) {
+            ui->teFuncRes->append("  局部变量：\n");
+            for (auto &v : func.value_infos_) {
+                if (v.deep_ == 0) continue;
+                ui->teFuncRes->append("    [变量] \t" + S2QS(v.name_) );
+                ui->teFuncRes->append("    类型：  \t" + S2QS(v.type_));
+                ui->teFuncRes->append("    作用域起始偏移：\t" + NUM2QS(v.start_));
+                ui->teFuncRes->append("    作用域末尾偏移：\t" + NUM2QS(v.end_));
+                ui->teFuncRes->append("    代码块深度：\t" + NUM2QS(v.deep_) + "\n");
+            }
+        }
+        ui->teFuncRes->append("\n");
+    }
+
+
     return ;
 }

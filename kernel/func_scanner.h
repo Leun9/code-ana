@@ -34,10 +34,10 @@ struct ValueInfo {
     int len_;
 
     ValueInfo(string name, size_t start, size_t end, int deep, bool unsign, string type, int size,
-        bool is_pointer, bool is_array, int len) : 
-        name_(name), start_(start), deep_(deep), unsigned_(unsign), type_(type), size_(size),
+        bool is_pointer, bool is_array, int len) :
+        name_(name), start_(start), end_(end), deep_(deep), unsigned_(unsign), type_(type), size_(size),
         is_pointer_(is_pointer), is_array_(is_array), len_(len) {};
-    
+
 };
 
 typedef unordered_map<pair<string, int>, ValueInfo> Value2Info; // 扫描过程中维护的变量信息，扫描过程中深度和名称可以唯一确定变量
