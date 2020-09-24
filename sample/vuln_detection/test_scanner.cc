@@ -9,7 +9,7 @@ long long v5;
 double v6;
 float v7;
 unsigned long long v8;
-char v9[100];
+char *v9[100];
 
 void f1() {
 }
@@ -28,6 +28,7 @@ unsigned long long f3() {
 
 
 int main(int argc, char *argv[]) {
+  char *i[10000] = {};
   {int i; {long i; {short i;}}}
   return 0;
 }

@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(this, SIGNAL(__HomUpdateTe(const QString&)), this, SLOT(HomUpdateTe(const QString&)), Qt::BlockingQueuedConnection);
 
     // DEBUG
-    ui->stackedWidget->setCurrentIndex(3);
+    ui->stackedWidget->setCurrentIndex(4);
 
 }
 
@@ -404,8 +404,11 @@ void MainWindow::on_btnFunPath_clicked()
         ui->teFuncRes->append("[全局变量]：\n");
         for (auto &v : global_values) {
             ui->teFuncRes->append("  [变量]\t" + S2QS(v.name_) );
-            ui->teFuncRes->append("  类型：\t" + S2QS(v.type_));
-            ui->teFuncRes->append("  长度：  \t" + NUM2QS(v.len_));   // FIXME
+            QString type(S2QS(v.type_) + " ");
+            if (v.is_pointer_) type.append("指针");
+            if (v.is_array_) type.append("数组");
+            ui->teFuncRes->append("  类型：\t" + type);
+            if (v.is_array_) ui->teFuncRes->append("  长度：  \t" + NUM2QS(v.len_));
             ui->teFuncRes->append("  作用域起始偏移：\t" + NUM2QS(v.start_));
             ui->teFuncRes->append("  作用域末尾偏移：\t" + NUM2QS(v.end_));
             ui->teFuncRes->append("  代码块深度：\t" + NUM2QS(v.deep_) + "\n");
@@ -421,8 +424,11 @@ void MainWindow::on_btnFunPath_clicked()
             for (auto &v : func.value_infos_) {
                 if (v.deep_ == 0) continue;
                 ui->teFuncRes->append("    [变量] \t" + S2QS(v.name_) );
-                ui->teFuncRes->append("    类型：  \t" + S2QS(v.type_));
-                ui->teFuncRes->append("    长度：  \t" + NUM2QS(v.len_));   // FIXME
+                QString type(S2QS(v.type_) + " ");
+                if (v.is_pointer_) type.append("指针");
+                if (v.is_array_) type.append("数组");
+                ui->teFuncRes->append("    类型：\t" + type);
+                if (v.is_array_) ui->teFuncRes->append("    长度：  \t" + NUM2QS(v.len_));
                 ui->teFuncRes->append("    作用域起始偏移：\t" + NUM2QS(v.start_));
                 ui->teFuncRes->append("    作用域末尾偏移：\t" + NUM2QS(v.end_));
                 ui->teFuncRes->append("    代码块深度：\t" + NUM2QS(v.deep_) + "\n");
