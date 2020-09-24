@@ -18,8 +18,12 @@ int f2() {
 
 }
 
-unsigned long long f3() {
+void _printf() {};
 
+unsigned long long f3() {
+  printf("");
+  vprintf("");
+  _printf();
 }
 
 
