@@ -9,11 +9,18 @@ using std::vector;
 using std::unordered_map;
 using codeana::kernel::util::Trie;
 
+Trie::Trie(const std::initializer_list<string> &lst) {
+  root_ = new TrieNode();
+  for (auto &str : lst) {
+    this->Insert(str);
+  }
+}
+
 bool Trie::Jump(Trie::TrieNode* &now, char ch) {
   if (now->next_.find(ch) == now->next_.end()) {
     return false;
   } else {
-    now = now->next_[ch]; // FIXME 
+    now = now->next_[ch]; // FIXME
     return true;
   }
 }
@@ -23,7 +30,7 @@ void Trie::Insert(string str) {
   for (int i = 0; i < str.size(); ++i) {
     if (now->next_.find(str[i]) == now->next_.end()) {
       now->next_[str[i]] = new TrieNode();
-    } 
+    }
     now = now->next_[str[i]]; // FIXME
     //putchar(str[i]);
   }
@@ -32,10 +39,7 @@ void Trie::Insert(string str) {
 }
 
 // int main() {
-//   Trie trie;
-//   trie.Insert("husthust");
-//   trie.Insert("csecse");
-//   trie.Insert("hustcse");
+//   Trie trie({"husthust", "hustcse"});
 
 //   auto now = trie.root_;
 //   string str("hustck");

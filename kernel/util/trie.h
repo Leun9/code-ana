@@ -1,5 +1,5 @@
-#ifndef CODEANA_KERNEL_UTIL_CALC_SIMILARITY_H_
-#define CODEANA_KERNEL_UTIL_CALC_SIMILARITY_H_
+#ifndef CODEANA_KERNEL_UTIL_TRIE_H_
+#define CODEANA_KERNEL_UTIL_TRIE_H_
 
 #include <string>
 #include <vector>
@@ -22,15 +22,16 @@ struct Trie {
     TrieNode() : is_leaf_(0) {};
     TrieNode(bool is_leaf) : is_leaf_(is_leaf) {}
   };
-  
+
   Trie() {root_ = new TrieNode();};
+  Trie(const std::initializer_list<string> &lst);
   ~Trie() {}; // TODO
-  
+
   bool Jump(TrieNode* &now, char ch);
   void Insert(string str);
-  
+
   TrieNode* root_;
-  
+
 };
 
 } // util
@@ -38,4 +39,4 @@ struct Trie {
 } // namespace codeana
 
 
-#endif // CODEANA_KERNEL_UTIL_CALC_SIMILARITY_H_
+#endif // CODEANA_KERNEL_UTIL_TRIE_H_

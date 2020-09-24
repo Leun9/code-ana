@@ -6,20 +6,20 @@
 #include <iostream>
 #include <unordered_set>
 #include <QDebug>
+#include "util/type.h"
 
 using std::string;
 using std::vector;
 using std::unordered_map;
 using std::unordered_set;
+using codeana::kernel::util::ISBLANK;
+using codeana::kernel::util::ISIDCHAR;
 
 
 namespace codeana {
 namespace kernel {
 
 #define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Func Scan Error.\n", __FILE__, __LINE__);} while(0);
-
-bool ISIDCHAR(char x) {return ((x <= '9' && x >= '0') || (x <= 'z' && x >= 'a') || (x <= 'Z' && x >= 'A') || (x == '_'));}
-bool ISBLANK(char x) {return ((x == '\n') || (x == '\t') || (x == ' '));}
 
 unordered_map<string, int> type2size({{"void", 0}, {"bool", 1}, {"char", 1}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
 unordered_set<string> integer({"short", "int", "long", "long long"});

@@ -45,9 +45,9 @@ other special char:
 #include <utility>
 
 #include <QDebug>
+#include "util/type.h"
 
 #define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Lex Ana Error.\n", __FILE__, __LINE__);} while(0);
-#define ISIDCHAR(x) ((x <= '9' && x >= '0') || (x <= 'z' && x >= 'a') || (x <= 'Z' && x >= 'A') || (x == '_'))
 
 #define N_KEYWORDS 74
 #define KEYWORDS \
@@ -75,6 +75,7 @@ using std::string;
 using std::vector;
 using std::cout;
 using std::pair;
+using codeana::kernel::util::ISIDCHAR;
 
 /* FIXME :
   do not consider tab
