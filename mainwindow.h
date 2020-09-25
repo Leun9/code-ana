@@ -41,6 +41,10 @@ private slots:
     void on_actionFuncScan_triggered();
     void on_btnFunPath_clicked();
 
+    void on_actionVulnDet_triggered();
+
+    void on_btnVulnPath_clicked();
+
 private:
     void HomologyDetectionThread(QString hom_dst_path, int mode);
     void HomologyDetection();

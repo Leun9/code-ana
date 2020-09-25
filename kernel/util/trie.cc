@@ -10,6 +10,7 @@ using std::unordered_map;
 using codeana::kernel::util::Trie;
 
 Trie::Trie(const std::initializer_list<string> &lst) {
+  leaf_cnt_ = 0;
   root_ = new TrieNode();
   for (auto &str : lst) {
     this->Insert(str);
@@ -20,21 +21,23 @@ bool Trie::Jump(Trie::TrieNode* &now, char ch) {
   if (now->next_.find(ch) == now->next_.end()) {
     return false;
   } else {
-    now = now->next_[ch]; // FIXME
+    now = now->next_[ch]; // FIXME 重复计算hash
     return true;
   }
 }
 
 void Trie::Insert(string str) {
   TrieNode* now = root_;
-  for (int i = 0; i < str.size(); ++i) {
+  for (size_t i = 0; i < str.size(); ++i) {
     if (now->next_.find(str[i]) == now->next_.end()) {
       now->next_[str[i]] = new TrieNode();
     }
-    now = now->next_[str[i]]; // FIXME
+    now = now->next_[str[i]]; // FIXME 重复计算hash
     //putchar(str[i]);
   }
   now->is_leaf_ = 1;
+  now->leaf_num_ = leaf_cnt_; // FIXME 不考虑重复插入相同节点
+  ++leaf_cnt_;
   //putchar('\n');
 }
 

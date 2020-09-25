@@ -18,12 +18,12 @@ struct Trie {
   struct TrieNode {
     unordered_map<char, TrieNode*> next_;
     bool is_leaf_;
+    int leaf_num_;
 
     TrieNode() : is_leaf_(0) {};
     TrieNode(bool is_leaf) : is_leaf_(is_leaf) {}
   };
 
-  Trie() {root_ = new TrieNode();};
   Trie(const std::initializer_list<string> &lst);
   ~Trie() {}; // TODO
 
@@ -31,6 +31,7 @@ struct Trie {
   void Insert(string str);
 
   TrieNode* root_;
+  int leaf_cnt_;
 
 };
 

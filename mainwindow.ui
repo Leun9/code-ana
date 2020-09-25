@@ -312,6 +312,7 @@
    <addaction name="actionCfgExt"/>
    <addaction name="actionHomDet"/>
    <addaction name="actionFuncScan"/>
+   <addaction name="actionVulnDet"/>
   </widget>
   <action name="actionLexAna">
    <property name="text">
@@ -331,6 +332,11 @@
   <action name="actionFuncScan">
    <property name="text">
     <string>函数扫描</string>
+   </property>
+  </action>
+  <action name="actionVulnDet">
+   <property name="text">
+    <string>漏洞检测</string>
    </property>
   </action>
  </widget>

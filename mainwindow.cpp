@@ -15,6 +15,7 @@
 #include "kernel/lexical_analyzer.h"
 #include "kernel/cfg_dfs.h"
 #include "kernel/func_scanner.h"
+#include "kernel/buf_vuln_scan.h"
 
 #define S2QS(x) (QString::fromStdString(x))
 #define NUM2QS(...) (QString::number(__VA_ARGS__))
@@ -26,6 +27,15 @@ using std::sort;
 using std::thread;
 
 using namespace codeana::kernel;
+
+#define VULN_FUNC_LIST \
+{"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
+"gets", "fread", \
+"scanf", "sscanf", "fscanf", "vscanf", "vsscanf", "vfscanf", \
+"printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf"}
+
+static vector<string> vuln_func(VULN_FUNC_LIST);
+static vector<string> errlevel2str({"UNKNOWN", "LOW", "MIDDLE", "HIGH"});
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -439,4 +449,58 @@ void MainWindow::on_btnFunPath_clicked()
 
 
     return ;
+}
+
+void MainWindow::on_actionVulnDet_triggered()
+{
+    ui->stackedWidget->setCurrentIndex(4);
+}
+
+void MainWindow::on_btnVulnPath_clicked()
+{
+    QFileDialog *fileDialog = new QFileDialog(this); // 定义文件对话框类
+    fileDialog->setWindowTitle(QStringLiteral("选中文件")); // 定义文件对话框标题
+    fileDialog->setDirectory(".");  // 设置默认文件路径
+    fileDialog->setNameFilter(tr("File(*.*)")); // 设置文件过滤器
+    //fileDialog->setFileMode(QFileDialog::ExistingFiles); // 设置可以选择多个文件,默认为只能选择一个文件QFileDialog::ExistingFiles
+    fileDialog->setViewMode(QFileDialog::Detail); // 设置视图模式
+    QStringList fileNames;
+    if (fileDialog->exec()) {
+        fileNames = fileDialog->selectedFiles();
+    } else {
+        return ;
+    }
+    QString vuln_src_path(fileNames[0]);
+    ui->leVulnPath->setText(vuln_src_path);
+    QFile vuln_src_file(vuln_src_path);
+    if (!vuln_src_file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // TODO : Warn & Update StatusBar
+        return;
+    }
+    QString qstr = vuln_src_file.readAll();
+    ui->teVulnSrc->setText(qstr);
+    auto str = qstr.toStdString();
+    vuln_src_file.close();
+
+    FuncInfos func_infos;
+    ValueInfos global_values;
+    GetFuncInfos(func_infos, global_values, str);
+
+    vector<int> pos;
+    vector<string> info;
+    vector<int> errlevel;
+    vector<int> func_type;
+    ui->teVulnRes->clear();
+    for (auto &func_info : func_infos) {
+        //qDebug() << str.substr(func_info.start_, func_info.end_-func_info.start_+1).c_str();
+        string func(str.substr(func_info.start_, func_info.end_-func_info.start_+1));
+        ui->teVulnRes->append("\n[Func]" + S2QS(func_info.name_));
+        BufVulnScan(pos, func_type, info, errlevel, func, func_info.value_infos_);
+        for (size_t i = 0; i < pos.size(); ++i) ui->teVulnRes->append(
+                    "起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
+                    ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
+                    "，危险等级：" + S2QS(errlevel2str[errlevel[i]]) +
+                    "， 信息：" + S2QS(info[i]));
+    }
+
 }

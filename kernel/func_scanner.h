@@ -31,7 +31,7 @@ struct ValueInfo {
     // for pointer or array
     bool is_pointer_;
     bool is_array_;
-    int len_;
+    size_t len_;
 
     ValueInfo(string name, size_t start, size_t end, int deep, bool unsign, string type, int size,
         bool is_pointer, bool is_array, int len) :

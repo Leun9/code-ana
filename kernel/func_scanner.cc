@@ -21,7 +21,7 @@ namespace kernel {
 
 #define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Func Scan Error.\n", __FILE__, __LINE__);} while(0);
 
-unordered_map<string, int> type2size({{"void", 0}, {"bool", 1}, {"char", 1}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
+unordered_map<string, int> type2size({{"void", 0}, {"bool", 1}, {"char", 1}, {"wchar_t", 2}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
 unordered_set<string> integer({"short", "int", "long", "long long"});
 
 void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str) {
@@ -128,7 +128,8 @@ if (deep == 0)  {
             while (!ISIDCHAR(str[v_end])) {v_end--; if (str[v_end] == ']') isa = 1;}
             size_t v_start = v_end;
             while (ISIDCHAR(str[v_start])) v_start--;
-            name = str.substr(v_start + 1, v_end - v_start);
+            size_t start = v_start + 1;
+            name = str.substr(start, v_end - v_start);
             while (ISBLANK(str[v_start])) v_start--;
             if (str[v_start] == '*') {isp = 1; do {--v_start;} while (ISBLANK(str[v_start]));}
             type = str.substr(type_start, v_start - type_start + 1);
