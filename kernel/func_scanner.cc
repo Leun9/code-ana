@@ -41,18 +41,11 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
                 while (str[i] != '\n') ++i;
 
         } else if (str[i] == '*') {
-            if (str[i-1] == '/') {
-                while (true) {
-                    ++i;
-                    if (str[i] == '/' && str[i-1] == '*') break;
-                }
-            }
+            if (str[i-1] == '/')
+                do {++i;} while (str[i] != '/' || str[i-1] != '*');
 
         } else if (str[i] == '\"') {
-            while (true) {
-                ++i;
-                if (str[i] == '\"' && str[i-1] != '\\') break;
-            }
+            do {++i;} while (str[i] != '\"' && str[i-1] != '\\');
 
         } else if (str[i] == '{') { // FIXME : 未考虑注释的特殊情况
             ++deep;

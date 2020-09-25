@@ -54,7 +54,27 @@ unsigned long long f3() {
   return 0;
 }
 
+void f4() {
+  char arr[2];
+  {
+    memcpy(arr, v2, 2); // 安全
+    char arr[1];
+    memcpy(arr, v2, 2); // 不安全
+    {
+      memcpy(arr, v2, 2); // 不安全
+      char arr[3]; 
+      memcpy(arr, v2, 3); // 安全
+    }
+    memcpy(arr, v2, 3); // 不安全
+    {
+      memcpy(arr, v2, 1); // 安全
+      char arr[2];
+      memcpy(arr, v2, 2); // 安全
+    }
+  }
+}
 
+/*** test block comment ***/
 int main(int argc, char *argv[]) {
   //gets();
   f1();

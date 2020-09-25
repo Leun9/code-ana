@@ -19,7 +19,8 @@ using std::unordered_map;
 namespace codeana {
 namespace kernel {
 
-void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel, string &func, ValueInfos &value_infos);
+void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
+                 vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos);
 
 } // namespace kernel
 } // namespace codeana

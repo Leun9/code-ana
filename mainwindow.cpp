@@ -15,7 +15,7 @@
 #include "kernel/lexical_analyzer.h"
 #include "kernel/cfg_dfs.h"
 #include "kernel/func_scanner.h"
-#include "kernel/buf_vuln_scan.h"
+#include "kernel/vuln_scan.h"
 
 #define S2QS(x) (QString::fromStdString(x))
 #define NUM2QS(...) (QString::number(__VA_ARGS__))
@@ -491,15 +491,16 @@ void MainWindow::on_btnVulnPath_clicked()
     vector<string> info;
     vector<int> errlevel;
     vector<int> func_type;
+    vector<int> errtype;
     ui->teVulnRes->clear();
     for (auto &func_info : func_infos) {
         //qDebug() << str.substr(func_info.start_, func_info.end_-func_info.start_+1).c_str();
-        string func(str.substr(func_info.start_, func_info.end_-func_info.start_+1));
         ui->teVulnRes->append("\n[Func] " + S2QS(func_info.name_));
-        BufVulnScan(pos, func_type, info, errlevel, func, func_info.value_infos_);
+        BufVulnScan(pos, func_type, info, errlevel, errtype,
+                    str, func_info.start_, func_info.end_, func_info.value_infos_);
         for (size_t i = 0; i < pos.size(); ++i) {
             //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
-            QString temp = "起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
+            QString temp = "起始位置：" + NUM2QS(pos[i]) +
                            ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
                            "，危险等级：" + S2QS(errlevel2str[errlevel[i]]);
             if (!info[i].empty()) temp += "， 信息：" + S2QS(info[i]);

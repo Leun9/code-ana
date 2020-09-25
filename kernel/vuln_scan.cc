@@ -1,9 +1,10 @@
-#include "buf_vuln_scan.h"
+#include "vuln_scan.h"
 
 #include <string>
 #include <vector>
 #include <utility>
 #include <list>
+#include <stack>
 #include <unordered_map>
 #include <iostream>
 #include <QDebug>
@@ -16,6 +17,7 @@ using std::string;
 using std::vector;
 using std::pair;
 using std::list;
+using std::stack;
 using std::unordered_map;
 using codeana::kernel::util::Trie;
 using codeana::kernel::util::ISIDCHAR;
@@ -41,6 +43,13 @@ enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
 
 static Trie buf_vuln_trie(VULN_FUNC_LIST);
 
+#define PUSHARG(x, y, z) \
+do { \
+    args.push_back(x); \
+    nums.push_back(y); \
+    types.push_back(z); \
+} while(0);
+
 void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &types, vector<size_t> &nums) {
     args.clear();
     types.clear();
@@ -53,9 +62,7 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
             size_t len = 0;
             do {++i; ++len; if (str[i] == '\\') ++i;} while (str[i] != '\"');
             // qDebug() << i;
-            args.push_back(str.substr(start, i+1-start));
-            nums.push_back(len);
-            types.push_back(KSTR);
+            PUSHARG(str.substr(start, i+1-start), len, KSTR);
             while (str[i] != ',' && str[i] != ')') ++i;
             continue;
         } else if (str[i] == 'L' && str[i+1] == '"') {
@@ -63,124 +70,160 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
             size_t len = 0;
             do {++i; ++len; if (str[i] == '\\') ++i;} while (str[i] != '\"');
             // qDebug() << i;
-            args.push_back(str.substr(start, i+1-start));
-            nums.push_back(len * 2);
-            types.push_back(KSTR);
+            PUSHARG(str.substr(start, i+1-start), len*2, KSTR);
             while (str[i] != ',' && str[i] != ')') ++i;
             continue;
         } else if (str[i] >= '0' && str[i] <= '9'){
             while (str[i] >= '0' && str[i] <= '9') ++i;
             end = i;
-            while (ISBLANK(i)) ++i;
+            while (ISBLANK(str[i])) ++i;
             if (str[i] == ',' || str[i] == ')') {
-                args.push_back(str.substr(start, end-start));
                 size_t x = 0;
                 for (size_t i = start; i < end; ++i) {x *= 10; x += str[i] - '0';}
-                nums.push_back(x);
-                types.push_back(KNUM);
+                PUSHARG(str.substr(start, end-start), x, KNUM);
                 continue;
             }
         } else if (ISIDCHAR(str[i])) { // FIXME 类型强制
             while (ISIDCHAR(str[i])) ++i;
             end = i;
-            while (ISBLANK(i)) ++i;
+            while (ISBLANK(str[i])) ++i;
             if (str[i] == ',' || str[i] == ')') {
-                args.push_back(str.substr(start, end-start));
-                nums.push_back(0); // FIXME
-                types.push_back(VALUE);
+                PUSHARG(str.substr(start, end-start), 0, VALUE); // FIXME
                 continue;
             }
         }
         while (str[i] != ',' && str[i] != ')') ++i;
         if (start == i) continue;
-        args.push_back(str.substr(start, i-start));
-        nums.push_back(0); //
-        types.push_back(EXP);
+        //qDebug() << "EXP" << str.substr(start, i-start).c_str();
+        PUSHARG(str.substr(start, i-start), 0, EXP);
     }
 }
 
-#define PUSH(x, y, z) do {pos.push_back(x); func_type.push_back(now->leaf_num_); info.push_back(y); errlevel.push_back(z);} while(0);
-void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel, string &func, ValueInfos &value_infos) {
+#define PUSHVULN(x, y, z) \
+do { \
+    pos.push_back(x); \
+    func_type.push_back(now->leaf_num_); \
+    info.push_back(y); \
+    errlevel.push_back(z); \
+    errtype.push_back(0); \
+} while(0);
+
+void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
+                 vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {
   pos.clear();
   func_type.clear();
   info.clear();
   errlevel.clear();
-  unordered_map<string, ValueInfo*> value2info;
-  for (auto &vinfo : value_infos) {
-    value2info[vinfo.name_] = &vinfo;
-  }
-  size_t func_size = func.size();
-  // qDebug() << func_size;
-  for (size_t i = 0; i < func_size;) {
-    while (!ISIDCHAR(func[i]) && i < func_size) ++i;
+  errtype.clear();
+
+  unordered_map<string, stack<ValueInfo*>> value2info;
+  auto vinfo_it = value_infos.begin();
+
+  int deep = 0;
+  for (size_t i = func_start; i < func_end;) {
+    while (!ISIDCHAR(str[i]) && i < func_end) {
+        //qDebug() << vinfo_it->name_.c_str() << vinfo_it->start_;
+        while (vinfo_it != value_infos.end() && i >= vinfo_it->start_) {
+            //qDebug() << vinfo_it->name_.c_str();
+            value2info[vinfo_it->name_].push(&*vinfo_it);
+            ++vinfo_it;
+        }
+
+        if (str[i] == '/') {
+            if (str[i-1] == '/')
+                while (str[i] != '\n') ++i;
+
+        } else if (str[i] == '*') {
+            if (str[i-1] == '/')
+                do {++i;} while (str[i] != '/' || str[i-1] != '*');
+
+        } else if (str[i] == '\"') {
+            do {++i;} while (str[i] != '\"' && str[i-1] != '\\');
+
+        } else if (str[i] == '{') {
+            ++deep;
+
+        } else if (str[i] == '}') { // 更新valuemap
+            --deep;
+            for (auto it = vinfo_it; ; --it) {
+                if (it->deep_ == deep+1) value2info[it->name_].pop();
+                if (it->deep_ < deep) break;
+                if (it == value_infos.begin()) break;
+            }
+        }
+        ++i;
+    }
+
     size_t start = i;
     Trie::TrieNode* now = buf_vuln_trie.root_;
-    while (buf_vuln_trie.Jump(now, func[i])) ++i;
+    while (buf_vuln_trie.Jump(now, str[i])) ++i;
 
-    if (now->is_leaf_ && !ISIDCHAR(func[i])) {
+    if (now->is_leaf_ && !ISIDCHAR(str[i])) {
         vector<string> args;
         vector<int> types;
         vector<size_t> nums;
-        GetArg(func, i, args, types, nums);
+        GetArg(str, i, args, types, nums);
+        //qDebug() << str.substr(start, i-start).c_str();
 
         if (now->leaf_num_  == STRCPY || now->leaf_num_ == WCSCPY) {
             if (types[0] == VALUE && types[1] == KSTR) {
-                auto vinfo = value2info[args[0]];
+                auto vinfo = value2info[args[0]].top(); // FIXME
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
-                    PUSH(start, "", LOW);
+                    PUSHVULN(start, "", LOW);
                 } else {
-                    PUSH(start, "拷贝的常量字符串长度大于数组长度", HIGH);
+                    PUSHVULN(start, "拷贝的常量字符串长度大于数组长度", HIGH);
                 }
         } else {
-            PUSH(start, "可能存在漏洞", MIDDLE);
+            PUSHVULN(start, "可能存在漏洞", MIDDLE);
         }
 
         } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
               if (types[0] == VALUE && types[2] == KNUM) {
-                  auto vinfo = value2info[args[0]];
+                  auto vinfo = value2info[args[0]].top(); // FIXME
+                  //qDebug() << vinfo->name_.c_str() << vinfo->len_ * vinfo->size_ << nums[2];
                   if (vinfo->len_ * vinfo->size_ >= nums[2]) {
-                      PUSH(start, "", LOW);
+                      PUSHVULN(start, "", LOW);
                   } else {
-                      PUSH(start, "指定的拷贝长度大于数组长度", HIGH);
+                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH);
                   }
               } else {
-                  PUSH(start, "可能存在漏洞", MIDDLE);
+                  PUSHVULN(start, "可能存在漏洞", MIDDLE);
               }
 
         }  else if (now->leaf_num_ == WCSNCPY) {
               if (types[0] == VALUE && types[2] == KNUM) {
-                  auto vinfo = value2info[args[0]];
+                  auto vinfo = value2info[args[0]].top(); // FIXME
                   if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
-                      PUSH(start, "", LOW);
+                      PUSHVULN(start, "", LOW);
                   } else {
-                      PUSH(start, "指定的拷贝长度大于数组长度", HIGH);
+                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH);
                   }
               } else {
-                  PUSH(start, "可能存在漏洞", MIDDLE);
+                  PUSHVULN(start, "可能存在漏洞", MIDDLE);
               }
 
         } else if (now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) {
                 //qDebug() << now->leaf_num_;
-                PUSH(start, "可能存在漏洞", HIGH);
+                PUSHVULN(start, "可能存在漏洞", HIGH);
                 //qDebug() << func_type[func_type.size() - 1];
 
         } else if (now->leaf_num_ == FREAD) {
             if (types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
-                auto vinfo = value2info[args[0]];
+                auto vinfo = value2info[args[0]].top(); // FIXME
                 if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
-                    PUSH(start, "", LOW);
+                    PUSHVULN(start, "", LOW);
                 } else {
-                    PUSH(start, "指定的读入长度大于数组长度", HIGH);
+                    PUSHVULN(start, "指定的读入长度大于数组长度", HIGH);
                 }
             } else {
-                PUSH(start, "可能存在漏洞", MIDDLE);
+                PUSHVULN(start, "可能存在漏洞", MIDDLE);
             }
         } else {
-            PUSH(start, "", MIDDLE);
+            PUSHVULN(start, "", MIDDLE);
         }
 
     } else {
-      while (ISIDCHAR(func[i])) ++i;
+      while (ISIDCHAR(str[i])) ++i;
     }
 
   }
