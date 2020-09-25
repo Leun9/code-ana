@@ -6,17 +6,22 @@
 #include <utility>
 #include <list>
 #include <unordered_map>
+#include <unordered_set>
 
 using std::string;
 using std::vector;
 using std::pair;
 using std::list;
 using std::unordered_map;
+using std::unordered_set;
 
 namespace codeana {
 namespace kernel {
 
 enum {UNKNOWNPOS, STACK, HEAP};
+
+static unordered_map<string, int> type2size({{"void", 0}, {"_Bool", 1}, {"char", 1}, {"wchar_t", 2}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
+static unordered_set<string> integer({"short", "int", "long", "long long"});
 
 struct ValueInfo {
     string name_;

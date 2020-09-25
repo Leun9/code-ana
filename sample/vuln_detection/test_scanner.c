@@ -1,7 +1,7 @@
-#include <cstdio>
-#include <cstring>
+#include <stdio.h>
+#include <string.h>
 
-bool v0;
+_Bool v0; // bool 不为C的关键字
 int v1;
 char v2[] = "hustis\n";
 wchar_t v3[4];
@@ -12,7 +12,7 @@ float v7;
 unsigned long long v8;
 char *v9[100];
 
-void f1() {
+void f1() { // 测试部分函数
   strcpy(v2, "hustis\n");
   strcpy(v2, "hustcse\n");
   strcpy(v2, v2);
@@ -33,7 +33,7 @@ void f1() {
   //printf("[INFO] %ls\n", v3);
 }
 
-int f2() {
+int f2() { // 测试部分函数
   strcat(v2, v2);
   wcscat(v3, v3);
   strncat(v2, v2, 5);
@@ -41,13 +41,13 @@ int f2() {
   gets(v2);
 }
 
-void _printf() {
+void _printf() { // 测试部分函数
   fread(v2, 8, 1, stdin);
   fread(v2, v1, 1, stdin);
   fread(v2, 8, 2, stdin);
 };
 
-unsigned long long f3() {
+unsigned long long f3() { // 测试部分函数
   printf("");
   //vprintf("");
   _printf();

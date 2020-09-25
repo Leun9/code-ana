@@ -23,12 +23,14 @@ namespace kernel {
 {"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
 "gets", "fread", \
 "scanf", "sscanf", "fscanf", "vscanf", "vsscanf", "vfscanf", \
-"printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf"}
+"printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf", \
+"malloc"}
 
 enum {STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT, WCSNCAT,
       GETS, FREAD,
       SCANF, SSCANF, FSCANF, VSCANF, VSSCANF, VFSCANF,
-      PRINTF, SPRINTF, FPRINTF, VPRINTF, VSPRINTF, VFPRINTF};
+      PRINTF, SPRINTF, FPRINTF, VPRINTF, VSPRINTF, VFPRINTF,
+      MALLOC};
 
 enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
 enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};

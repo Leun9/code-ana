@@ -19,9 +19,6 @@ using codeana::kernel::util::ISIDCHAR;
 namespace codeana {
 namespace kernel {
 
-unordered_map<string, int> type2size({{"void", 0}, {"bool", 1}, {"char", 1}, {"wchar_t", 2}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
-unordered_set<string> integer({"short", "int", "long", "long long"});
-
 void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str) {
     func_infos.clear();
     global_values.clear();
