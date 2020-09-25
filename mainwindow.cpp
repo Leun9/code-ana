@@ -28,6 +28,7 @@ using std::thread;
 
 using namespace codeana::kernel;
 
+// keep mainwindow.cpp & buf_vuln_scan same
 #define VULN_FUNC_LIST \
 {"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
 "gets", "fread", \
@@ -496,11 +497,13 @@ void MainWindow::on_btnVulnPath_clicked()
         string func(str.substr(func_info.start_, func_info.end_-func_info.start_+1));
         ui->teVulnRes->append("\n[Func] " + S2QS(func_info.name_));
         BufVulnScan(pos, func_type, info, errlevel, func, func_info.value_infos_);
-        for (size_t i = 0; i < pos.size(); ++i) ui->teVulnRes->append(
-                    "起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
-                    ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
-                    "，危险等级：" + S2QS(errlevel2str[errlevel[i]]) +
-                    "， 信息：" + S2QS(info[i]));
+        for (size_t i = 0; i < pos.size(); ++i) {
+            //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
+            ui->teVulnRes->append("起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
+                                  ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
+                                  "，危险等级：" + S2QS(errlevel2str[errlevel[i]]) +
+                                  "， 信息：" + S2QS(info[i]));
+        }
     }
 
 }

@@ -24,6 +24,7 @@ using codeana::kernel::util::ISBLANK;
 namespace codeana {
 namespace kernel {
 
+// keep mainwindow.cpp & buf_vuln_scan same
 #define VULN_FUNC_LIST \
 {"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
 "gets", "fread", \
@@ -101,6 +102,7 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
 #define PUSH(x, y, z) do {pos.push_back(x); func_type.push_back(now->leaf_num_); info.push_back(y); errlevel.push_back(z);} while(0);
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel, string &func, ValueInfos &value_infos) {
   pos.clear();
+  func_type.clear();
   info.clear();
   errlevel.clear();
   unordered_map<string, ValueInfo*> value2info;
@@ -114,13 +116,14 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
     size_t start = i;
     Trie::TrieNode* now = buf_vuln_trie.root_;
     while (buf_vuln_trie.Jump(now, func[i])) ++i;
-    if (now->is_leaf_ && !ISIDCHAR(func[i])) {
-      vector<string> args;
-      vector<int> types;
-      vector<size_t> nums;
-      GetArg(func, i, args, types, nums);
 
-      if (now->leaf_num_  == STRCPY || now->leaf_num_ == WCSCPY) {
+    if (now->is_leaf_ && !ISIDCHAR(func[i])) {
+        vector<string> args;
+        vector<int> types;
+        vector<size_t> nums;
+        GetArg(func, i, args, types, nums);
+
+        if (now->leaf_num_  == STRCPY || now->leaf_num_ == WCSCPY) {
             if (types[0] == VALUE && types[1] == KSTR) {
                 auto vinfo = value2info[args[0]];
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
@@ -128,40 +131,43 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 } else {
                     PUSH(start, "写入长度大于数组长度", HIGH);
                 }
-            } else {
-                PUSH(start, "可能存在漏洞", MIDDLE);
-            }
+        } else {
+            PUSH(start, "可能存在漏洞", MIDDLE);
+        }
 
-    } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
-          if (types[0] == VALUE && types[2] == KNUM) {
-              auto vinfo = value2info[args[0]];
-              if (vinfo->len_ * vinfo->size_ >= nums[2]) {
-                  PUSH(start, "", LOW);
+        } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
+              if (types[0] == VALUE && types[2] == KNUM) {
+                  auto vinfo = value2info[args[0]];
+                  if (vinfo->len_ * vinfo->size_ >= nums[2]) {
+                      PUSH(start, "", LOW);
+                  } else {
+                      PUSH(start, "指定的写入长度大于数组长度", HIGH);
+                  }
               } else {
-                  PUSH(start, "指定的写入长度大于数组长度", HIGH);
+                  PUSH(start, "可能存在漏洞", MIDDLE);
               }
-          } else {
-              PUSH(start, "可能存在漏洞", MIDDLE);
-          }
 
-    }  else if (now->leaf_num_ == WCSNCPY) {
-          if (types[0] == VALUE && types[2] == KNUM) {
-              auto vinfo = value2info[args[0]];\
-              if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
-                  PUSH(start, "", LOW);
+        }  else if (now->leaf_num_ == WCSNCPY) {
+              if (types[0] == VALUE && types[2] == KNUM) {
+                  auto vinfo = value2info[args[0]];
+                  if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
+                      PUSH(start, "", LOW);
+                  } else {
+                      PUSH(start, "指定的写入长度大于数组长度", HIGH);
+                  }
               } else {
-                  PUSH(start, "指定的写入长度大于数组长度", HIGH);
+                  PUSH(start, "可能存在漏洞", MIDDLE);
               }
-          } else {
-              PUSH(start, "可能存在漏洞", MIDDLE);
-          }
 
-    } else if (now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) {
-            PUSH(start, "可能存在漏洞", HIGH);
+        } else if (now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) {
+                //qDebug() << now->leaf_num_;
+                PUSH(start, "可能存在漏洞", HIGH);
+                //qDebug() << func_type[func_type.size() - 1];
 
-      } else if (now->leaf_num_ == FREAD) {
+        } else if (now->leaf_num_ == FREAD) {
             if (types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
-                if (value2info[args[0]]->len_ >= nums[1] * nums[2]) {
+                auto vinfo = value2info[args[0]];
+                if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
                     PUSH(start, "", LOW);
                 } else {
                     PUSH(start, "读入长度大于数组长度", HIGH);
@@ -169,7 +175,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             } else {
                 PUSH(start, "可能存在漏洞", MIDDLE);
             }
-      }
+        } else {
+            PUSH(start, "", MIDDLE);
+        }
 
     } else {
       while (ISIDCHAR(func[i])) ++i;

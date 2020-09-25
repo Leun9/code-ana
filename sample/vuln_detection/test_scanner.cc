@@ -34,15 +34,17 @@ void f1() {
 }
 
 int f2() {
-  strcat(v2, v2, 5);
-  wcscat(v3, v3, 5);
-  strcat(v2, v2, 5);
-  wcscat(v3, v3, 5);
+  strcat(v2, v2);
+  wcscat(v3, v3);
+  strncat(v2, v2, 5);
+  wcsncat(v3, v3, 5);
   gets(v2);
 }
 
 void _printf() {
   fread(v2, 8, 1, stdin);
+  fread(v2, v1, 1, stdin);
+  fread(v2, 8, 2, stdin);
 };
 
 unsigned long long f3() {
