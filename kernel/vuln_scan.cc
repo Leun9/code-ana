@@ -187,9 +187,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                   PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
               }
 
-        } else if ((now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) ||
-                   (now->leaf_num_ >= VSCANF && now->leaf_num_ <= VFSCANF) ||
-                   (now->leaf_num_ >= VSPRINTF && now->leaf_num_ <= VFPRINTF) ) {
+        } else if ((now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS)) {
                 //qDebug() << now->leaf_num_;
                 PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
                 //qDebug() << func_type[func_type.size() - 1];
@@ -214,7 +212,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             do {--start;} while (!ISIDCHAR(str[end]));
             auto vinfo = value2info[str.substr(start+1, end-start)].top(); // FIXME
             vinfo->pos_ = HEAP;
-            if (types[0] == KNUM) vinfo->len_ = nums[0];
+            if (types[0] == KNUM) vinfo->len_ = nums[0] / vinfo->size_;
 
         } else {
             PUSHVULN(start, "", MIDDLE, BUFOF);
