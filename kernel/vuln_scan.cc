@@ -214,8 +214,28 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             vinfo->pos_ = HEAP;
             if (types[0] == KNUM) vinfo->len_ = nums[0] / vinfo->size_;
 
+        } else if (now->leaf_num_ == CALLOC) { // FIXME
+            size_t end = i;
+            while (str[end] != '=') --end;
+            do {--end;} while (ISBLANK(str[end]));
+            size_t start = end;
+            do {--start;} while (!ISIDCHAR(str[end]));
+            auto vinfo = value2info[str.substr(start+1, end-start)].top(); // FIXME
+            vinfo->pos_ = HEAP;
+            if (types[0] == KNUM && types[1] == KNUM)
+                vinfo->len_ = nums[0] * nums[1] / vinfo->size_;
+
+        }  else if (now->leaf_num_ == REALLOC) { // FIXME
+            auto vinfo = value2info[args[0]].top();
+            vinfo->pos_ = HEAP;
+            if (types[1] == KNUM) vinfo->len_ = nums[1] / vinfo->size_;
+
+        } else if (now->leaf_num_ == FREE) { // FIXME
+            auto vinfo = value2info[args[0]].top();
+            vinfo->len_ = 0;
+
         } else {
-            PUSHVULN(start, "", MIDDLE, BUFOF);
+            //PUSHVULN(start, "", MIDDLE, BUFOF);
         }
 
     } else {

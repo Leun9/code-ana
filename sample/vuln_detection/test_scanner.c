@@ -84,7 +84,14 @@ void f5() { // 测试堆溢出/栈溢出
   p = (char*) malloc(10);
   memcpy(p, v2, 12);
   memcpy(p, v2, 10);
-
+  free(p);
+  memcpy(p, v2, 10);
+  p = (char*) calloc(10, 1);
+  memcpy(p, v2, 12);
+  memcpy(p, v2, 10);
+  realloc(p, 12);
+  memcpy(p, v2, 12);
+  memcpy(p, v2, 13);
 }
 
 /*** test block comment ***/
