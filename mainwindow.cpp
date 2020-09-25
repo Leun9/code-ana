@@ -499,10 +499,11 @@ void MainWindow::on_btnVulnPath_clicked()
         BufVulnScan(pos, func_type, info, errlevel, func, func_info.value_infos_);
         for (size_t i = 0; i < pos.size(); ++i) {
             //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
-            ui->teVulnRes->append("起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
-                                  ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
-                                  "，危险等级：" + S2QS(errlevel2str[errlevel[i]]) +
-                                  "， 信息：" + S2QS(info[i]));
+            QString temp = "起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
+                           ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
+                           "，危险等级：" + S2QS(errlevel2str[errlevel[i]]);
+            if (!info[i].empty()) temp += "， 信息：" + S2QS(info[i]);
+            ui->teVulnRes->append(temp);
         }
     }
 

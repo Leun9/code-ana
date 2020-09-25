@@ -129,7 +129,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
                     PUSH(start, "", LOW);
                 } else {
-                    PUSH(start, "写入长度大于数组长度", HIGH);
+                    PUSH(start, "拷贝的常量字符串长度大于数组长度", HIGH);
                 }
         } else {
             PUSH(start, "可能存在漏洞", MIDDLE);
@@ -141,7 +141,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                   if (vinfo->len_ * vinfo->size_ >= nums[2]) {
                       PUSH(start, "", LOW);
                   } else {
-                      PUSH(start, "指定的写入长度大于数组长度", HIGH);
+                      PUSH(start, "指定的拷贝长度大于数组长度", HIGH);
                   }
               } else {
                   PUSH(start, "可能存在漏洞", MIDDLE);
@@ -153,7 +153,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                   if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
                       PUSH(start, "", LOW);
                   } else {
-                      PUSH(start, "指定的写入长度大于数组长度", HIGH);
+                      PUSH(start, "指定的拷贝长度大于数组长度", HIGH);
                   }
               } else {
                   PUSH(start, "可能存在漏洞", MIDDLE);
@@ -170,7 +170,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
                     PUSH(start, "", LOW);
                 } else {
-                    PUSH(start, "读入长度大于数组长度", HIGH);
+                    PUSH(start, "指定的读入长度大于数组长度", HIGH);
                 }
             } else {
                 PUSH(start, "可能存在漏洞", MIDDLE);
