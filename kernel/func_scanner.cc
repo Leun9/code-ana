@@ -19,8 +19,6 @@ using codeana::kernel::util::ISIDCHAR;
 namespace codeana {
 namespace kernel {
 
-#define PRTERROR do {fprintf(stderr, "[File:%s][Line:%d]Func Scan Error.\n", __FILE__, __LINE__);} while(0);
-
 unordered_map<string, int> type2size({{"void", 0}, {"bool", 1}, {"char", 1}, {"wchar_t", 2}, {"short", 2}, {"int", 4}, {"long", 4}, {"float", 4}, {"long long", 8}, {"double", 4}}) ;
 unordered_set<string> integer({"short", "int", "long", "long long"});
 
@@ -128,7 +126,7 @@ if (deep == 0)  {
             type = str.substr(type_start, v_start - type_start + 1);
 
             // std::cout << "[" << type << "] " << name << "\n";
-            func_info.value_infos_.push_back(ValueInfo(name, start, code_size-1, 1, unsign, type, size, isp, isa, 0));
+            func_info.value_infos_.push_back(ValueInfo(name, start, code_size-1, 1, unsign, type, size, isp, isa, 0, UNKNOWNPOS));
             if (str[i] == ')') break;
         }
     }
@@ -167,7 +165,9 @@ if (str[i] == '{') { // 实现
                 // std::cout << i << str[i] << "\n";
 
                 size_t end = code_size - 1; // 全局变量：end = str_size - 1
-                func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign, type, size, isp, isa, len));
+                int pos = UNKNOWNPOS;
+                if (isa) pos = STACK;
+                func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign, type, size, isp, isa, len, pos));
                 while (str[i] != ',' && str[i] != ';' && str[i] != '\"' && str[i] != '{') ++i;
                 if (str[i] == '{') {
                     do {++i;} while (str[i] != '}');

@@ -28,15 +28,9 @@ using std::thread;
 
 using namespace codeana::kernel;
 
-// keep mainwindow.cpp & buf_vuln_scan same
-#define VULN_FUNC_LIST \
-{"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
-"gets", "fread", \
-"scanf", "sscanf", "fscanf", "vscanf", "vsscanf", "vfscanf", \
-"printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf"}
-
-static vector<string> vuln_func(VULN_FUNC_LIST);
-static vector<string> errlevel2str({"UNKNOWN", "LOW", "MIDDLE", "HIGH"});
+static vector<QString> functype2qstr(VULN_FUNC_LIST);
+static vector<QString> errlevel2qstr({"UNKNOWN", "LOW", "MIDDLE", "HIGH"});
+static vector<QString> errtype2qstr({"缓冲区溢出", "栈缓冲区溢出", "堆缓冲区溢出"});
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -500,10 +494,11 @@ void MainWindow::on_btnVulnPath_clicked()
                     str, func_info.start_, func_info.end_, func_info.value_infos_);
         for (size_t i = 0; i < pos.size(); ++i) {
             //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
-            QString temp = "起始位置：" + NUM2QS(pos[i]) +
-                           ", 函数类型：" + S2QS(vuln_func[func_type[i]]) +
-                           "，危险等级：" + S2QS(errlevel2str[errlevel[i]]);
-            if (!info[i].empty()) temp += "， 信息：" + S2QS(info[i]);
+            QString temp = "偏移：" + NUM2QS(pos[i]) +
+                           ", 函数：" + functype2qstr[func_type[i]] +
+                           "，危险等级：" + errlevel2qstr[errlevel[i]];
+            if (errlevel[i] > LOW) temp += "， 漏洞类型：" + errtype2qstr[errtype[i]];
+            if  (!info[i].empty()) temp += "， 信息：" + S2QS(info[i]);
             ui->teVulnRes->append(temp);
         }
     }

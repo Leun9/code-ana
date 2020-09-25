@@ -19,6 +19,21 @@ using std::unordered_map;
 namespace codeana {
 namespace kernel {
 
+#define VULN_FUNC_LIST \
+{"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
+"gets", "fread", \
+"scanf", "sscanf", "fscanf", "vscanf", "vsscanf", "vfscanf", \
+"printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf"}
+
+enum {STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT, WCSNCAT,
+      GETS, FREAD,
+      SCANF, SSCANF, FSCANF, VSCANF, VSSCANF, VFSCANF,
+      PRINTF, SPRINTF, FPRINTF, VPRINTF, VSPRINTF, VFPRINTF};
+
+enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
+enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
+enum {BUFOF, STACKOF, HEAPOF};
+
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos);
 

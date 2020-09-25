@@ -16,6 +16,8 @@ using std::unordered_map;
 namespace codeana {
 namespace kernel {
 
+enum {UNKNOWNPOS, STACK, HEAP};
+
 struct ValueInfo {
     string name_;
     // 防止同名变量，变量名加作用域和深度可以唯一确定变量
@@ -32,11 +34,12 @@ struct ValueInfo {
     bool is_pointer_;
     bool is_array_;
     size_t len_;
+    int pos_;
 
     ValueInfo(string name, size_t start, size_t end, int deep, bool unsign, string type, int size,
-        bool is_pointer, bool is_array, int len) :
+        bool is_pointer, bool is_array, int len, int pos) :
         name_(name), start_(start), end_(end), deep_(deep), unsigned_(unsign), type_(type), size_(size),
-        is_pointer_(is_pointer), is_array_(is_array), len_(len) {};
+        is_pointer_(is_pointer), is_array_(is_array), len_(len), pos_(pos) {};
 
 };
 

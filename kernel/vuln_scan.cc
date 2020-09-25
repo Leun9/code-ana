@@ -26,21 +26,6 @@ using codeana::kernel::util::ISBLANK;
 namespace codeana {
 namespace kernel {
 
-// keep mainwindow.cpp & buf_vuln_scan same
-#define VULN_FUNC_LIST \
-{"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
-"gets", "fread", \
-"scanf", "sscanf", "fscanf", "vscanf", "vsscanf", "vfscanf", \
-"printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf"}
-
-enum {STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT, WCSNCAT,
-      GETS, FREAD,
-      SCANF, SSCANF, FSCANF, VSCANF, VSSCANF, VFSCANF,
-      PRINTF, SPRINTF, FPRINTF, VPRINTF, VSPRINTF, VFPRINTF};
-
-enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
-enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
-
 static Trie buf_vuln_trie(VULN_FUNC_LIST);
 
 #define PUSHARG(x, y, z) \
@@ -99,13 +84,13 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
     }
 }
 
-#define PUSHVULN(x, y, z) \
+#define PUSHVULN(x, y, z, t) \
 do { \
     pos.push_back(x); \
     func_type.push_back(now->leaf_num_); \
     info.push_back(y); \
     errlevel.push_back(z); \
-    errtype.push_back(0); \
+    errtype.push_back(t); \
 } while(0);
 
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
@@ -169,12 +154,12 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             if (types[0] == VALUE && types[1] == KSTR) {
                 auto vinfo = value2info[args[0]].top(); // FIXME
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
-                    PUSHVULN(start, "", LOW);
+                    PUSHVULN(start, "", LOW, vinfo->pos_);
                 } else {
-                    PUSHVULN(start, "拷贝的常量字符串长度大于数组长度", HIGH);
+                    PUSHVULN(start, "拷贝的常量字符串长度大于数组长度", HIGH, vinfo->pos_);
                 }
         } else {
-            PUSHVULN(start, "可能存在漏洞", MIDDLE);
+            PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
         }
 
         } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
@@ -182,44 +167,46 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                   auto vinfo = value2info[args[0]].top(); // FIXME
                   //qDebug() << vinfo->name_.c_str() << vinfo->len_ * vinfo->size_ << nums[2];
                   if (vinfo->len_ * vinfo->size_ >= nums[2]) {
-                      PUSHVULN(start, "", LOW);
+                      PUSHVULN(start, "", LOW, vinfo->pos_);
                   } else {
-                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH);
+                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH, vinfo->pos_);
                   }
               } else {
-                  PUSHVULN(start, "可能存在漏洞", MIDDLE);
+                  PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
               }
 
         }  else if (now->leaf_num_ == WCSNCPY) {
               if (types[0] == VALUE && types[2] == KNUM) {
                   auto vinfo = value2info[args[0]].top(); // FIXME
                   if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
-                      PUSHVULN(start, "", LOW);
+                      PUSHVULN(start, "", LOW, vinfo->pos_);
                   } else {
-                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH);
+                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH, vinfo->pos_);
                   }
               } else {
-                  PUSHVULN(start, "可能存在漏洞", MIDDLE);
+                  PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
               }
 
-        } else if (now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) {
+        } else if ((now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) ||
+                   (now->leaf_num_ >= VSCANF && now->leaf_num_ <= VFSCANF) ||
+                   (now->leaf_num_ >= VSPRINTF && now->leaf_num_ <= VFPRINTF) ) {
                 //qDebug() << now->leaf_num_;
-                PUSHVULN(start, "可能存在漏洞", HIGH);
+                PUSHVULN(start, "可能存在漏洞", HIGH, BUFOF);
                 //qDebug() << func_type[func_type.size() - 1];
 
         } else if (now->leaf_num_ == FREAD) {
             if (types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
                 auto vinfo = value2info[args[0]].top(); // FIXME
                 if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
-                    PUSHVULN(start, "", LOW);
+                    PUSHVULN(start, "", LOW, vinfo->pos_);
                 } else {
-                    PUSHVULN(start, "指定的读入长度大于数组长度", HIGH);
+                    PUSHVULN(start, "指定的读入长度大于数组长度", HIGH, vinfo->pos_);
                 }
             } else {
-                PUSHVULN(start, "可能存在漏洞", MIDDLE);
+                PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
             }
         } else {
-            PUSHVULN(start, "", MIDDLE);
+            PUSHVULN(start, "", MIDDLE, BUFOF);
         }
 
     } else {

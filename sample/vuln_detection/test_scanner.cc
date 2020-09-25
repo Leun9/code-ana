@@ -54,7 +54,7 @@ unsigned long long f3() {
   return 0;
 }
 
-void f4() {
+void f4() { // 测试重名变量
   char arr[2];
   {
     memcpy(arr, v2, 2); // 安全
