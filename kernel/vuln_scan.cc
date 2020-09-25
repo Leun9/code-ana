@@ -151,37 +151,37 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
         //qDebug() << str.substr(start, i-start).c_str();
 
         if (now->leaf_num_  == STRCPY || now->leaf_num_ == WCSCPY) {
-            if (types[0] == VALUE && types[1] == KSTR) {
-                auto vinfo = value2info[args[0]].top(); // FIXME
+            auto vinfo = value2info[args[0]].top(); // FIXME
+            if (vinfo->len_ && types[0] == VALUE && types[1] == KSTR) {
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
                     PUSHVULN(start, "", LOW, vinfo->pos_);
                 } else {
-                    PUSHVULN(start, "拷贝的常量字符串长度大于数组长度", HIGH, vinfo->pos_);
+                    PUSHVULN(start, "拷贝的常量字符串长度大于可用长度", HIGH, vinfo->pos_);
                 }
         } else {
             PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
         }
 
         } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
-              if (types[0] == VALUE && types[2] == KNUM) {
-                  auto vinfo = value2info[args[0]].top(); // FIXME
+            auto vinfo = value2info[args[0]].top(); // FIXME
+              if (vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
                   //qDebug() << vinfo->name_.c_str() << vinfo->len_ * vinfo->size_ << nums[2];
                   if (vinfo->len_ * vinfo->size_ >= nums[2]) {
                       PUSHVULN(start, "", LOW, vinfo->pos_);
                   } else {
-                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH, vinfo->pos_);
+                      PUSHVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
                   }
               } else {
                   PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
               }
 
         }  else if (now->leaf_num_ == WCSNCPY) {
-              if (types[0] == VALUE && types[2] == KNUM) {
-                  auto vinfo = value2info[args[0]].top(); // FIXME
+            auto vinfo = value2info[args[0]].top(); // FIXME
+              if (vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
                   if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
                       PUSHVULN(start, "", LOW, vinfo->pos_);
                   } else {
-                      PUSHVULN(start, "指定的拷贝长度大于数组长度", HIGH, vinfo->pos_);
+                      PUSHVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
                   }
               } else {
                   PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
@@ -191,20 +191,31 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                    (now->leaf_num_ >= VSCANF && now->leaf_num_ <= VFSCANF) ||
                    (now->leaf_num_ >= VSPRINTF && now->leaf_num_ <= VFPRINTF) ) {
                 //qDebug() << now->leaf_num_;
-                PUSHVULN(start, "可能存在漏洞", HIGH, BUFOF);
+                PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
                 //qDebug() << func_type[func_type.size() - 1];
 
         } else if (now->leaf_num_ == FREAD) {
-            if (types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
-                auto vinfo = value2info[args[0]].top(); // FIXME
+            auto vinfo = value2info[args[0]].top(); // FIXME
+            if (vinfo->len_ && types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
                 if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
                     PUSHVULN(start, "", LOW, vinfo->pos_);
                 } else {
-                    PUSHVULN(start, "指定的读入长度大于数组长度", HIGH, vinfo->pos_);
+                    PUSHVULN(start, "指定的读入长度大于可用长度", HIGH, vinfo->pos_);
                 }
             } else {
                 PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
             }
+
+        } else if (now->leaf_num_ == MALLOC) { // FIXME
+            size_t end = i;
+            while (str[end] != '=') --end;
+            do {--end;} while (ISBLANK(str[end]));
+            size_t start = end;
+            do {--start;} while (!ISIDCHAR(str[end]));
+            auto vinfo = value2info[str.substr(start+1, end-start)].top(); // FIXME
+            vinfo->pos_ = HEAP;
+            if (types[0] == KNUM) vinfo->len_ = nums[0];
+
         } else {
             PUSHVULN(start, "", MIDDLE, BUFOF);
         }

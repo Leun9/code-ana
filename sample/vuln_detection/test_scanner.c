@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 _Bool v0; // bool 不为C的关键字
 int v1;
@@ -72,6 +73,18 @@ void f4() { // 测试重名变量
       memcpy(arr, v2, 2); // 安全
     }
   }
+}
+
+void f5() { // 测试堆溢出/栈溢出
+  char str[10];
+  char *p;
+  memcpy(str, v2, 12);
+  p = str;
+  memcpy(p, v2, 12);
+  p = (char*) malloc(10);
+  memcpy(p, v2, 12);
+  memcpy(p, v2, 10);
+
 }
 
 /*** test block comment ***/

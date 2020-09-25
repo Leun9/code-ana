@@ -163,7 +163,9 @@ if (str[i] == '{') { // 实现
 
                 size_t end = code_size - 1; // 全局变量：end = str_size - 1
                 int pos = UNKNOWNPOS;
-                if (isa) pos = STACK;
+                if (isa) {
+                    pos = (deep == 0)?HEAP:STACK;
+                }
                 func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign, type, size, isp, isa, len, pos));
                 while (str[i] != ',' && str[i] != ';' && str[i] != '\"' && str[i] != '{') ++i;
                 if (str[i] == '{') {
