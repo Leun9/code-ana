@@ -494,7 +494,7 @@ void MainWindow::on_btnVulnPath_clicked()
     for (auto &func_info : func_infos) {
         //qDebug() << str.substr(func_info.start_, func_info.end_-func_info.start_+1).c_str();
         string func(str.substr(func_info.start_, func_info.end_-func_info.start_+1));
-        ui->teVulnRes->append("\n[Func]" + S2QS(func_info.name_));
+        ui->teVulnRes->append("\n[Func] " + S2QS(func_info.name_));
         BufVulnScan(pos, func_type, info, errlevel, func, func_info.value_infos_);
         for (size_t i = 0; i < pos.size(); ++i) ui->teVulnRes->append(
                     "起始位置：" + NUM2QS(func_info.start_ + pos[i]) +
