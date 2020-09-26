@@ -28,6 +28,8 @@ using std::thread;
 
 using namespace codeana::kernel;
 
+static vector<QString> unsign2str({"", "unsigned "});
+static vector<QString> type2str({"unknown", "void", "_Bool", "char", "wchar_t", "short", "int", "long","float", "long long", "double"});
 static vector<QString> functype2qstr(VULN_FUNC_LIST);
 static vector<QString> errlevel2qstr({"UNKNOWN", "LOW", "MIDDLE", "HIGH"});
 static vector<QString> errtype2qstr({"缓冲区溢出", "栈缓冲区溢出", "堆缓冲区溢出"});
@@ -409,7 +411,7 @@ void MainWindow::on_btnFunPath_clicked()
         ui->teFuncRes->append("[全局变量]：\n");
         for (auto &v : global_values) {
             ui->teFuncRes->append("  [变量]\t" + S2QS(v.name_) );
-            QString type(S2QS(v.type_) + " ");
+            QString type(unsign2str[v.unsigned_] + type2str[v.type_] + " ");
             if (v.is_pointer_) type.append("指针");
             if (v.is_array_) type.append("数组");
             ui->teFuncRes->append("  类型：\t" + type);
@@ -429,7 +431,7 @@ void MainWindow::on_btnFunPath_clicked()
             for (auto &v : func.value_infos_) {
                 if (v.deep_ == 0) continue;
                 ui->teFuncRes->append("    [变量] \t" + S2QS(v.name_) );
-                QString type(S2QS(v.type_) + " ");
+                QString type(unsign2str[v.unsigned_] + type2str[v.type_] + " ");
                 if (v.is_pointer_) type.append("指针");
                 if (v.is_array_) type.append("数组");
                 ui->teFuncRes->append("    类型：\t" + type);

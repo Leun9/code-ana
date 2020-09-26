@@ -70,7 +70,7 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
             size_t j = i;
             while (ISIDCHAR(str[i])) ++i;
             string token(str.substr(j, i - j));
-            if (type2size.find(token) == type2size.end()) continue;
+            if (str2type.find(token) == str2type.end()) continue;
             if (token == "long") { // 判long long
                 size_t j = i;
                 while (ISBLANK(str[j])) ++j;
@@ -83,12 +83,11 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
                 }
             }
             string type(token);
-            int size = type2size[type];
+            int size = type2size[str2type[type]];
             bool unsign = 0;
             if (integer.find(token) != integer.end()) {
                 do {--j;} while (ISBLANK(str[j]));
                 if (str.substr(j-7, 8) == "unsigned") {
-                    type = "unsigned " + type;
                     unsign = 1;
                 }
             }
@@ -123,7 +122,8 @@ if (deep == 0)  {
             type = str.substr(type_start, v_start - type_start + 1);
 
             // std::cout << "[" << type << "] " << name << "\n";
-            func_info.value_infos_.push_back(ValueInfo(name, start, code_size-1, 1, unsign, type, size, isp, isa, 0, UNKNOWNPOS));
+            func_info.value_infos_.push_back(ValueInfo(name, start, code_size-1, 1, unsign,
+                                                       str2type[type], size, isp, isa, 0, UNKNOWNPOS));
             if (str[i] == ')') break;
         }
     }
@@ -166,7 +166,8 @@ if (str[i] == '{') { // 实现
                 if (isa) {
                     pos = (deep == 0)?HEAP:STACK;
                 }
-                func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign, type, size, isp, isa, len, pos));
+                func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign,
+                                                           str2type[type], size, isp, isa, len, pos));
                 while (str[i] != ',' && str[i] != ';' && str[i] != '\"' && str[i] != '{') ++i;
                 if (str[i] == '{') {
                     do {++i;} while (str[i] != '}');

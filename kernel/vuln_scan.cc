@@ -93,6 +93,11 @@ do { \
     errtype.push_back(t); \
 } while(0);
 
+
+//void GetFormatArg(string const &str, vector<string> &args, vector<int> &types, vector<size_t> &nums) {
+//
+//}
+
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {
   pos.clear();
