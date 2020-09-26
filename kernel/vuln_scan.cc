@@ -181,7 +181,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                     PUSHVULN(start, "拷贝的常量字符串长度大于可用长度", HIGH, vinfo->pos_);
                 }
         } else {
-            PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
+            PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
         }
 
         } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
@@ -194,7 +194,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                       PUSHVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
                   }
               } else {
-                  PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
+                  PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
               }
 
         }  else if (now->leaf_num_ == WCSNCPY) {
@@ -206,7 +206,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                       PUSHVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
                   }
               } else {
-                  PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
+                  PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
               }
 
         } else if ((now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS)) {
@@ -223,7 +223,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                     PUSHVULN(start, "指定的读入长度大于可用长度", HIGH, vinfo->pos_);
                 }
             } else {
-                PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
+                PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
             }
 
         } else if (now->leaf_num_ == MALLOC) { // FIXME

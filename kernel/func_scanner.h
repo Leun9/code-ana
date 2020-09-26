@@ -25,7 +25,8 @@ enum {UNKNOWNPOS, STACK, HEAP};
 static unordered_map<string, int> str2type({{"void", VOID}, {"_Bool", _BOOL}, {"char", CHAR}, {"wchar_t", WCHAR_T}, {"short", SHORT},
                                              {"int", INT}, {"long", LONG}, {"float", FLOAT}, {"long long", LONG_LONG}, {"double", DOUBLE}});
 
-static vector<size_t> type2size({0, 0, 1, 1, 2, 2, 4, 4, 4, 8, 4});
+static vector<size_t> type2size({0, 0, sizeof(bool), sizeof(char), sizeof(wchar_t), sizeof(short),
+                                 sizeof(int), sizeof(long), sizeof(float), sizeof(long long), sizeof(double)});
 
 static unordered_set<string> integer({"short", "int", "long", "long long"});
 
