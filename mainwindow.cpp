@@ -415,7 +415,9 @@ void MainWindow::on_btnFunPath_clicked()
             if (v.is_pointer_) type.append("指针");
             if (v.is_array_) type.append("数组");
             ui->teFuncRes->append("  类型：\t" + type);
-            if (v.is_array_) ui->teFuncRes->append("  长度：  \t" + NUM2QS(v.len_));
+            ui->teFuncRes->append("  宽度：\t" + NUM2QS(v.width_));
+            if (v.is_array_ || v.is_pointer_) ui->teFuncRes->append("  单元宽度：\t" + NUM2QS(v.size_));
+            if (v.is_array_) ui->teFuncRes->append("  数组可用长度：  \t" + NUM2QS(v.len_));
             ui->teFuncRes->append("  作用域起始偏移：\t" + NUM2QS(v.start_));
             ui->teFuncRes->append("  作用域末尾偏移：\t" + NUM2QS(v.end_));
             ui->teFuncRes->append("  代码块深度：\t" + NUM2QS(v.deep_) + "\n");

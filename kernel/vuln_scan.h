@@ -33,8 +33,12 @@ enum {STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT,
       MALLOC, CALLOC, REALLOC, FREE};
 
 enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
+
 enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
+
 enum {BUFOF, STACKOF, HEAPOF};
+
+// static unordered_set<pair<string, int>> format_type_set({});
 
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos);

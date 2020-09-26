@@ -12,6 +12,7 @@ double v6;
 float v7;
 unsigned long long v8;
 char *v9[100];
+unsigned char v10;
 
 void f1() { // 测试部分函数
   strcpy(v2, "hustis\n");
@@ -94,10 +95,14 @@ void f5() { // 测试堆溢出/栈溢出
   memcpy(p, v2, 13);
 }
 
+void f6() { // 测试printf
+  printf("[%*.*d] [%*.*f]", 2, 2, 1, 4, 2, 1.0);
+}
+
 /*** test block comment ***/
 int main(int argc, char *argv[]) {
   //gets();
-  f1();
+  f6();
   char *i[10000] = {};
   {int i; {long i; {short i;}}}
   return 0;

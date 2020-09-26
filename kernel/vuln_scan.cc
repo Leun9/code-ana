@@ -93,10 +93,27 @@ do { \
     errtype.push_back(t); \
 } while(0);
 
+/***
+ *
+ * %[flags][width][.precision][length]specifier
+ * flags : - or + or BLANK or # or 0
+ * width : number or *
+ * precision : number or *
+ * length : h or L or l
+ *
+ ***/
 
-//void GetFormatArg(string const &str, vector<string> &args, vector<int> &types, vector<size_t> &nums) {
-//
-//}
+void GetPrintFormatArg(string const &str, vector<string> &args, vector<int> &types, vector<size_t> &nums) {
+    args.clear();
+    types.clear();
+    nums.clear();
+    auto str_size = str.size();
+    for (size_t i = 0; i < str_size; ) {
+        if (str[i] != '%') {i++; continue;}
+        if (str[i+1] == '%') {i+=2; continue;}
+
+    }
+}
 
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {

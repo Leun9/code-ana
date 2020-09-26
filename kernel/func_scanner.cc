@@ -83,7 +83,6 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
                 }
             }
             string type(token);
-            int size = type2size[str2type[type]];
             bool unsign = 0;
             if (integer.find(token) != integer.end()) {
                 do {--j;} while (ISBLANK(str[j]));
@@ -121,9 +120,17 @@ if (deep == 0)  {
             if (str[v_start] == '*') {isp = 1; do {--v_start;} while (ISBLANK(str[v_start]));}
             type = str.substr(type_start, v_start - type_start + 1);
 
+            int width, size;
+            if (isa || isp) {
+                size = type2size[str2type[type]];
+                width = type2size[INT];
+            } else {
+                width = type2size[str2type[type]];
+                size = 0;
+            }
             // std::cout << "[" << type << "] " << name << "\n";
             func_info.value_infos_.push_back(ValueInfo(name, start, code_size-1, 1, unsign,
-                                                       str2type[type], size, isp, isa, 0, UNKNOWNPOS));
+                                                       str2type[type], width, isp, isa, size, 0, UNKNOWNPOS));
             if (str[i] == ')') break;
         }
     }
@@ -166,8 +173,16 @@ if (str[i] == '{') { // 实现
                 if (isa) {
                     pos = (deep == 0)?HEAP:STACK;
                 }
+                int size, width;
+                if (isa || isp) {
+                    size = type2size[str2type[type]];
+                    width = type2size[INT];
+                } else {
+                    width = type2size[str2type[type]];
+                    size = 0;
+                }
                 func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign,
-                                                           str2type[type], size, isp, isa, len, pos));
+                                                           str2type[type], width, isp, isa, size, len, pos));
                 while (str[i] != ',' && str[i] != ';' && str[i] != '\"' && str[i] != '{') ++i;
                 if (str[i] == '{') {
                     do {++i;} while (str[i] != '}');

@@ -19,11 +19,14 @@ namespace codeana {
 namespace kernel {
 
 enum {UNKNOWNSTRUCT, VOID, _BOOL, CHAR, WCHAR_T, SHORT, INT, LONG, FLOAT, LONG_LONG, DOUBLE};
+
 enum {UNKNOWNPOS, STACK, HEAP};
 
 static unordered_map<string, int> str2type({{"void", VOID}, {"_Bool", _BOOL}, {"char", CHAR}, {"wchar_t", WCHAR_T}, {"short", SHORT},
                                              {"int", INT}, {"long", LONG}, {"float", FLOAT}, {"long long", LONG_LONG}, {"double", DOUBLE}});
+
 static vector<size_t> type2size({0, 0, 1, 1, 2, 2, 4, 4, 4, 8, 4});
+
 static unordered_set<string> integer({"short", "int", "long", "long long"});
 
 struct ValueInfo {
@@ -33,21 +36,21 @@ struct ValueInfo {
     size_t end_;
     int deep_;
 
-    //int pos_; // 0->global, 1->stack, 2->heap
     bool unsigned_;
     int type_; // FIXME : 考虑struct
-    int size_;
+    int width_;
 
     // for pointer or array
     bool is_pointer_;
     bool is_array_;
+    int size_;
     size_t len_;
-    int pos_;
+    int pos_;// 0->global, 1->stack, 2->heap
 
-    ValueInfo(string name, size_t start, size_t end, int deep, bool unsign, int type, int size,
-        bool is_pointer, bool is_array, int len, int pos) :
-        name_(name), start_(start), end_(end), deep_(deep), unsigned_(unsign), type_(type), size_(size),
-        is_pointer_(is_pointer), is_array_(is_array), len_(len), pos_(pos) {};
+    ValueInfo(string name, size_t start, size_t end, int deep, bool unsign, int type, int width,
+        bool is_pointer, bool is_array, int size, int len, int pos) :
+        name_(name), start_(start), end_(end), deep_(deep), unsigned_(unsign), type_(type), width_(width),
+        is_pointer_(is_pointer), is_array_(is_array), size_(size), len_(len), pos_(pos) {};
 
 };
 
