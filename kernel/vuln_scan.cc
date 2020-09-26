@@ -19,14 +19,12 @@ using std::pair;
 using std::list;
 using std::stack;
 using std::unordered_map;
-using codeana::kernel::util::Trie;
 using codeana::kernel::util::ISIDCHAR;
 using codeana::kernel::util::ISBLANK;
 
 namespace codeana {
 namespace kernel {
 
-static Trie buf_vuln_trie(VULN_FUNC_LIST);
 
 #define PUSHARG(x, y, z) \
 do { \
@@ -103,15 +101,22 @@ do { \
  *
  ***/
 
-void GetPrintFormatArg(string const &str, vector<string> &args, vector<int> &types, vector<size_t> &nums) {
-    args.clear();
+void GetPrintFormatArg(string const &str, vector<int> &types) {
     types.clear();
-    nums.clear();
     auto str_size = str.size();
     for (size_t i = 0; i < str_size; ) {
+        // int flag = 0;  不处理flag
+        // int width = 0; 不处理宽度
+        // int precision = 0; 不处理精度
         if (str[i] != '%') {i++; continue;}
         if (str[i+1] == '%') {i+=2; continue;}
-
+        while (str[i] < 'a'|| str[i] > 'z') {
+            if (str[i] == '*') types.push_back(FMT_x);
+            ++i;
+        }
+        auto now = format_type_trie.root_;
+        while (format_type_trie.Jump(now, str[i])) ++i;
+        types.push_back(now->leaf_num_);
     }
 }
 
@@ -256,8 +261,25 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             auto vinfo = value2info[args[0]].top();
             vinfo->len_ = 0;
 
-        } else {
-            //PUSHVULN(start, "", MIDDLE, BUFOF);
+        } else if (now->leaf_num_ == PRINTF){
+            if (types[0] == KSTR) {
+                vector<int> fmt_types;
+                GetPrintFormatArg(args[0], fmt_types);
+                if (args.size() - 1 != fmt_types.size()) {
+                    PUSHVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR);
+                } else {
+                    for (size_t i = 0; i < fmt_types.size(); ++i) {
+                        if (types[i+1] != VALUE) {PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;}
+                        auto vinfo = value2info[args[i+1]].top();
+                        int key = CAT8(fmt_types[0], CAT4(vinfo->unsigned_, vinfo->type_));
+                        if (format_type_set.find(key) == format_type_set.end()){
+                            PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR);
+                        }
+                    }
+                }
+            } else {
+                PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR);
+            }
         }
 
     } else {

@@ -32,7 +32,7 @@ static vector<QString> unsign2str({"", "unsigned "});
 static vector<QString> type2str({"unknown", "void", "_Bool", "char", "wchar_t", "short", "int", "long","float", "long long", "double"});
 static vector<QString> functype2qstr(VULN_FUNC_LIST);
 static vector<QString> errlevel2qstr({"UNKNOWN", "LOW", "MIDDLE", "HIGH"});
-static vector<QString> errtype2qstr({"缓冲区溢出", "栈缓冲区溢出", "堆缓冲区溢出"});
+static vector<QString> errtype2qstr({"缓冲区溢出", "栈缓冲区溢出", "堆缓冲区溢出", "格式化字符串"});
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)

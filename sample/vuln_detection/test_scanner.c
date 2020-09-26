@@ -78,7 +78,7 @@ void f4() { // 测试重名变量
 
 void f5() { // 测试堆溢出/栈溢出
   char str[10];
-  char *p;
+  unsigned char *p;
   memcpy(str, v2, 12);
   p = str;
   memcpy(p, v2, 12);
@@ -96,7 +96,15 @@ void f5() { // 测试堆溢出/栈溢出
 }
 
 void f6() { // 测试printf
-  printf("[%*.*d] [%*.*f]", 2, 2, 1, 4, 2, 1.0);
+  int x;
+  long long y;
+  char temp[] = "abcd";
+  printf("%d");
+  printf("%d", y);
+  printf("%*d", x);
+  printf(temp);
+  printf("%d", y+1);
+  //printf("[%*.*dabcd] [%*.*lfabcd]", 2, 2, 1, 4, 2, 1.0);
 }
 
 /*** test block comment ***/
