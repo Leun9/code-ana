@@ -1,6 +1,6 @@
 # Code-Ana
 
-词法分析 Lexical Analysis / 函数层次的CFG抽取 CFG Extraction / 同源性检测 Homology Detection
+词法分析 Lexical Analysis / 函数层次的CFG抽取 CFG Extraction / 同源性检测 Homology Detection / 代码漏洞检测 Vulnerability Detection
 
 
 
@@ -13,12 +13,15 @@
 
 
 
-## 功能简述
+## 功能
 
 - R1：GUI
 - R2：利用字符串匹配进行同源性检测
 - R3：利用控制流程图（CFG）进行同源性检测
 - A2：支持分布式任务调度
+- R4: 栈缓冲区检测
+- B1: 堆缓冲区检测
+- R5: 格式化字符串漏洞检测
 
 
 
