@@ -21,6 +21,7 @@ using std::unordered_set;
 namespace codeana {
 namespace kernel {
 
+/*** 敏感函数 ***/
 #define VULN_FUNC_LIST \
 {"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
 "gets", "fread", \
@@ -36,12 +37,16 @@ enum {STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT,
 
 static Trie buf_vuln_trie(VULN_FUNC_LIST);
 
+/*** 参数类型 ***/
 enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
 
+/*** 危险级别 ***/
 enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
 
+/*** 漏洞类型 ***/
 enum {BUFOF, STACKOF, HEAPOF, FORMATSTR};
 
+/*** 格式化字符串类型 ***/
 enum {FMT_d, FMT_o, FMT_x, FMT_X, FMT_u, FMT_f, FMT_e, FMT_E, FMT_g, FMT_G, FMT_c, FMT_s, FMT_p,
       FMT_hd, FMT_ho, FMT_hu, FMT_hx, FMT_hX,
       FMT_ld, FMT_lo, FMT_lu, FMT_lx, FMT_lX, FMT_lc, FMT_ls,
@@ -55,7 +60,7 @@ static Trie format_type_trie({"d", "o", "x", "X", "u", "f", "e", "E", "g", "G", 
                               "lld", "llo", "llu", "llx", "llX",
                               "le", "lE", "lf", "lg", "lG",
                               "lle", "llE", "llf", "llg", "llG"});
-
+/*** 类型匹配 ***/
 #define CAT8(a,b) ((a<<8)|(b))
 #define CAT4(a,b) ((a<<4)|(b))
 #define UNSIGN(x)  ((1<<4)|(x))

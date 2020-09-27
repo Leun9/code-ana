@@ -116,7 +116,7 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         }
         auto now = format_type_trie.root_;
         while (format_type_trie.Jump(now, str[i])) ++i;
-        types.push_back(now->leaf_num_);
+        if (now->is_leaf_) types.push_back(now->leaf_num_);
     }
 }
 
