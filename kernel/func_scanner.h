@@ -28,7 +28,7 @@ static unordered_map<string, int> str2type({{"void", VOID}, {"_Bool", _BOOL}, {"
 static vector<size_t> type2size({0, 0, sizeof(bool), sizeof(char), sizeof(wchar_t), sizeof(short),
                                  sizeof(int), sizeof(long), sizeof(float), sizeof(long long), sizeof(double)});
 
-static unordered_set<string> integer({"short", "int", "long", "long long"});
+static unordered_set<string> can_unsigned({"char", "short", "int", "long", "long long"});
 
 struct ValueInfo {
     string name_;

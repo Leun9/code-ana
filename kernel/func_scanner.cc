@@ -84,7 +84,7 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
             }
             string type(token);
             bool unsign = 0;
-            if (integer.find(token) != integer.end()) {
+            if (can_unsigned.find(token) != can_unsigned.end()) {
                 do {--j;} while (ISBLANK(str[j]));
                 if (str.substr(j-7, 8) == "unsigned") {
                     unsign = 1;

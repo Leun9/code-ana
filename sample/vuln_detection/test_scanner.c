@@ -104,6 +104,10 @@ void f6() { // 测试printf
   printf("%*d", x);
   printf(temp);
   printf("%d", y+1);
+  char ch;
+  float flo;
+  fprintf(temp, "%llx%*f%lld", y, x, flo, y);
+  sprintf(temp, "%llx%*f%lld", y, ch, flo, y);
   //printf("[%*.*dabcd] [%*.*lfabcd]", 2, 2, 1, 4, 2, 1.0);
 }
 
