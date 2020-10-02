@@ -33,6 +33,7 @@ do { \
     types.push_back(z); \
 } while(0);
 
+/*** 函数参数解析 ***/
 void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &types, vector<size_t> &nums) {
     args.clear();
     types.clear();
@@ -91,6 +92,8 @@ do { \
     errtype.push_back(t); \
 } while(0);
 
+
+/*** 格式化字符串参数解析 ***/
 /***
  *
  * %[flags][width][.precision][length]specifier
@@ -119,6 +122,34 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         if (now->is_leaf_) types.push_back(now->leaf_num_);
     }
 }
+
+#define CHECK_PRINT_FMT(MAGIC) \
+    if (types[MAGIC] == KSTR) { \
+        vector<int> fmt_types; \
+        GetPrintFormatArg(args[MAGIC], fmt_types); \
+        if (args.size()-1-MAGIC != fmt_types.size()) { \
+            PUSHVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR); \
+        } else { \
+            for (size_t i = 0; i < fmt_types.size(); ++i) { \
+                if (types[i+1+MAGIC] != VALUE) {PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
+                auto vinfo = value2info[args[i+1+MAGIC]].top(); \
+                /* FMT_p : is_pointer; FMT_s : char && is_pointer */ \
+                if (vinfo->is_pointer_ || vinfo->is_array_) { \
+                    if (fmt_types[i] == FMT_p) continue; \
+                    if (fmt_types[i] == FMT_s && vinfo->type_ == CHAR) continue; \
+                    PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                } \
+                int key = CAT8(fmt_types[i], CAT4(vinfo->unsigned_, vinfo->type_)); \
+                if (format_type_set.find(key) == format_type_set.end()){ \
+                    PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                } \
+            } \
+        } \
+    } else { \
+        PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
+    } \
+
+#define CHECK_SCANF_FMT(MAGIC)
 
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {
@@ -262,44 +293,17 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             vinfo->len_ = 0;
 
         } else if (now->leaf_num_ == PRINTF){
-            if (types[0] == KSTR) {
-                vector<int> fmt_types;
-                GetPrintFormatArg(args[0], fmt_types);
-                if (args.size() - 1 != fmt_types.size()) {
-                    PUSHVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR);
-                } else {
-                    for (size_t i = 0; i < fmt_types.size(); ++i) {
-                        if (types[i+1] != VALUE) {PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;}
-                        auto vinfo = value2info[args[i+1]].top();
-                        int key = CAT8(fmt_types[i], CAT4(vinfo->unsigned_, vinfo->type_));
-                        if (format_type_set.find(key) == format_type_set.end()){
-                            PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR);
-                        }
-                    }
-                }
-            } else {
-                PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR);
-            }
+            CHECK_PRINT_FMT(0);
 
         } else if (now->leaf_num_ == FPRINTF || now->leaf_num_ == SPRINTF){
-            if (types[1] == KSTR) {
-                vector<int> fmt_types;
-                GetPrintFormatArg(args[1], fmt_types);
-                if (args.size() - 2 != fmt_types.size()) {
-                    PUSHVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR);
-                } else {
-                    for (size_t i = 0; i < fmt_types.size(); ++i) {
-                        if (types[i+2] != VALUE) {PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;}
-                        auto vinfo = value2info[args[i+2]].top();
-                        int key = CAT8(fmt_types[i], CAT4(vinfo->unsigned_, vinfo->type_));
-                        if (format_type_set.find(key) == format_type_set.end()){
-                            PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR);
-                        }
-                    }
-                }
-            } else {
-                PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR);
-            }
+            CHECK_PRINT_FMT(1);
+
+        } else if (now->leaf_num_ == SCANF){
+            CHECK_SCANF_FMT(0);
+
+        } else if (now->leaf_num_ == FSCANF || now->leaf_num_ == SSCANF){
+            CHECK_SCANF_FMT(1);
+
         }
 
     } else {

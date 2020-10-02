@@ -38,7 +38,7 @@ struct ValueInfo {
     int deep_;
 
     bool unsigned_;
-    int type_; // FIXME : 考虑struct
+    int type_; // FIXME : pointer
     int width_;
 
     // for pointer or array

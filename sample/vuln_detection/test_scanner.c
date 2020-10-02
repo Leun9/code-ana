@@ -116,6 +116,6 @@ int main(int argc, char *argv[]) {
   //gets();
   f6();
   char *i[10000] = {};
-  {int i; {long i; {short i;}}}
+  {int i; printf("%d", i); {long i; {short i; printf("%d" , i);}}}
   return 0;
 }
