@@ -108,6 +108,9 @@ void f6() { // 测试printf
   float flo;
   fprintf(temp, "%llx%*f%lld", y, x, flo, y);
   sprintf(temp, "%llx%*f%lld", y, ch, flo, y);
+  scanf("%c", &ch);
+  scanf("%lld", &y, &ch);
+  scanf("%d", &y);
   //printf("[%*.*dabcd] [%*.*lfabcd]", 2, 2, 1, 4, 2, 1.0);
 }
 

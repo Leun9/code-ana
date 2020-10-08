@@ -46,7 +46,7 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
         if (str[i] == '\"') {
             size_t len = 0;
             do {++i; ++len; if (str[i] == '\\') ++i;} while (str[i] != '\"');
-            // qDebug() << i;
+            ////qDebug() << i;
             PUSHARG(str.substr(start, i+1-start), len, KSTR);
             while (str[i] != ',' && str[i] != ')') ++i;
             continue;
@@ -54,7 +54,7 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
             ++i;
             size_t len = 0;
             do {++i; ++len; if (str[i] == '\\') ++i;} while (str[i] != '\"');
-            // qDebug() << i;
+            ////qDebug() << i;
             PUSHARG(str.substr(start, i+1-start), len*2, KSTR);
             while (str[i] != ',' && str[i] != ')') ++i;
             continue;
@@ -158,7 +158,38 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
     } \
 
-#define CHECK_SCANF_FMT(MAGIC) ;
+/***
+ * FIXME:
+ * 1. 不同的格式化字符串格式
+ * 2. 作简化处理的参数匹配
+ ***/
+#define CHECK_SCANF_FMT(MAGIC) \
+    if (types[MAGIC] == KSTR) { \
+        vector<int> fmt_types; \
+        GetPrintFormatArg(args[MAGIC], fmt_types); \
+        if (args.size()-1-MAGIC != fmt_types.size()) { \
+            PUSHFUNCVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR); \
+        } else { \
+            for (size_t i = 0; i < fmt_types.size(); ++i) { \
+                string vi_str = args[i+1+MAGIC].substr(1); \
+                auto it = value2info.find(vi_str); \
+                if (it == value2info.end()) {PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
+                auto vinfo = it->second.top(); \
+                /* FMT_p : is_pointer; FMT_s : char && is_pointer */ \
+                if (vinfo->is_pointer_ || vinfo->is_array_) { \
+                    if (fmt_types[i] == FMT_p) continue; \
+                    if (fmt_types[i] == FMT_s && vinfo->type_ == CHAR) continue; \
+                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                } \
+                int key = CAT8(fmt_types[i], CAT4(vinfo->unsigned_, vinfo->type_)); \
+                if (format_type_set.find(key) == format_type_set.end()){ \
+                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                } \
+            } \
+        } \
+    } else { \
+        PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
+    } \
 
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {
@@ -174,7 +205,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
   int deep = 0;
   for (size_t i = func_start; i < func_end;) {
 
-    qDebug() << "[INFO0]" << i << str[i];
+   //qDebug() << "[INFO0]" << i << str[i];
     while (!ISIDCHAR(str[i]) && i < func_end) {
         //qDebug() << vinfo_it->name_.c_str() << vinfo_it->start_;
         while (vinfo_it != value_infos.end() && i >= vinfo_it->start_) {
@@ -242,11 +273,11 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
         ++i;
     }
 
-    qDebug() << "[INFO1]"  << i << str[i];
+   //qDebug() << "[INFO1]"  << i << str[i];
     size_t start = i;
     Trie::TrieNode* now = buf_vuln_trie.root_;
     while (buf_vuln_trie.Jump(now, str[i])) ++i;
-    qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
+   //qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
 
     if (now->is_leaf_ && !ISIDCHAR(str[i])) {
         vector<string> args;
@@ -368,7 +399,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
     } else {
       while (ISIDCHAR(str[i])) ++i;
     }
-    qDebug() << "[INFO3]"  << i << str[i];
+   //qDebug() << "[INFO3]"  << i << str[i];
 
   }
 }
