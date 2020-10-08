@@ -27,6 +27,7 @@ bool Trie::Jump(Trie::TrieNode* &now, char ch) {
 }
 
 void Trie::Insert(string str) {
+  if (str.size() == 0) return;
   TrieNode* now = root_;
   for (size_t i = 0; i < str.size(); ++i) {
     if (now->next_.find(str[i]) == now->next_.end()) {

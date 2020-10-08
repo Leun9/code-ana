@@ -123,7 +123,7 @@ if (deep == 0)  {
             int width, size;
             if (isa || isp) {
                 size = type2size[str2type[type]];
-                width = type2size[INT];
+                width = sizeof(void*);
             } else {
                 width = type2size[str2type[type]];
                 size = 0;

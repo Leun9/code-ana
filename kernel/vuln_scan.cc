@@ -21,6 +21,7 @@ using std::stack;
 using std::unordered_map;
 using codeana::kernel::util::ISIDCHAR;
 using codeana::kernel::util::ISBLANK;
+using codeana::kernel::util::ISIDBEGIN;
 
 namespace codeana {
 namespace kernel {
@@ -86,12 +87,20 @@ void GetArg(string const &str, size_t &i, vector<string> &args, vector<int> &typ
 #define PUSHVULN(x, y, z, t) \
 do { \
     pos.push_back(x); \
-    func_type.push_back(now->leaf_num_); \
+    func_type.push_back(0); \
     info.push_back(y); \
     errlevel.push_back(z); \
     errtype.push_back(t); \
 } while(0);
 
+#define PUSHFUNCVULN(x, y, z, t) \
+do { \
+    pos.push_back(x); \
+    func_type.push_back(now->leaf_num_); \
+    info.push_back(y); \
+    errlevel.push_back(z); \
+    errtype.push_back(t); \
+} while(0);
 
 /*** 格式化字符串参数解析 ***/
 /***
@@ -128,25 +137,25 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         vector<int> fmt_types; \
         GetPrintFormatArg(args[MAGIC], fmt_types); \
         if (args.size()-1-MAGIC != fmt_types.size()) { \
-            PUSHVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR); \
+            PUSHFUNCVULN(start, "格式化字符串参数个数不匹配", HIGH, FORMATSTR); \
         } else { \
             for (size_t i = 0; i < fmt_types.size(); ++i) { \
-                if (types[i+1+MAGIC] != VALUE) {PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
+                if (types[i+1+MAGIC] != VALUE) {PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
                 auto vinfo = value2info[args[i+1+MAGIC]].top(); \
                 /* FMT_p : is_pointer; FMT_s : char && is_pointer */ \
                 if (vinfo->is_pointer_ || vinfo->is_array_) { \
                     if (fmt_types[i] == FMT_p) continue; \
                     if (fmt_types[i] == FMT_s && vinfo->type_ == CHAR) continue; \
-                    PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
                 } \
                 int key = CAT8(fmt_types[i], CAT4(vinfo->unsigned_, vinfo->type_)); \
                 if (format_type_set.find(key) == format_type_set.end()){ \
-                    PUSHVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
                 } \
             } \
         } \
     } else { \
-        PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
+        PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
     } \
 
 #define CHECK_SCANF_FMT(MAGIC)
@@ -193,6 +202,36 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 if (it->deep_ < deep) break;
                 if (it == value_infos.begin()) break;
             }
+        } else if (str[i] == '=') { // 宽度溢出：赋值符号右边有宽度大于左边的变量
+            qDebug() << "HERE1";
+            // 赋值运算
+            size_t j = i;
+            while (!ISIDCHAR(str[j])) --j;
+            size_t start = j;
+            while (ISIDCHAR(str[start])) --start;
+            auto lvit = value2info.find(str.substr(start+1, j-start));
+            if (lvit == value2info.end()) {++i; continue;}
+            auto lvinfo = lvit->second.top(); // FIXME
+
+
+            if (str[i-1] != '>' && str[i-1] != '<' && str[i+1] != '=') {
+                qDebug() << "HERE2";
+                while (true) {
+                    while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') ++i, qDebug()<<str[i];
+                    if (str[i] == ',' || str[i] == ';') break;
+                    size_t start = i;
+                    while (ISIDCHAR(str[i])) ++i;
+                    auto vit = value2info.find(str.substr(start, i-start));
+                    if (vit != value2info.end()) {
+                        auto vinfo = vit->second.top();
+                        if ((size_t)vinfo->width_ > type2size[lvinfo->type_])
+                            PUSHVULN(start, "宽度溢出", HIGH, WIDTHOF);
+                    }
+                }
+                qDebug() << "HERE3";
+            }
+            qDebug() << "HERE4";
+
         }
         ++i;
     }
@@ -212,54 +251,54 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             auto vinfo = value2info[args[0]].top(); // FIXME
             if (vinfo->len_ && types[0] == VALUE && types[1] == KSTR) {
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
-                    PUSHVULN(start, "", LOW, vinfo->pos_);
+                    PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
                 } else {
-                    PUSHVULN(start, "拷贝的常量字符串长度大于可用长度", HIGH, vinfo->pos_);
+                    PUSHFUNCVULN(start, "拷贝的常量字符串长度大于可用长度", HIGH, vinfo->pos_);
                 }
         } else {
-            PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+            PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
         }
 
         } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
             auto vinfo = value2info[args[0]].top(); // FIXME
               if (vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
-                  //qDebug() << vinfo->name_.c_str() << vinfo->len_ * vinfo->size_ << nums[2];
+                  //qDebug() << vinfo->name_.c_str() << vinfo->lelvinfo =USn_ * vinfo->size_ << nums[2];
                   if (vinfo->len_ * vinfo->size_ >= nums[2]) {
-                      PUSHVULN(start, "", LOW, vinfo->pos_);
+                      PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
                   } else {
-                      PUSHVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
+                      PUSHFUNCVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
                   }
               } else {
-                  PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+                  PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
               }
 
         }  else if (now->leaf_num_ == WCSNCPY) {
             auto vinfo = value2info[args[0]].top(); // FIXME
               if (vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
                   if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
-                      PUSHVULN(start, "", LOW, vinfo->pos_);
+                      PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
                   } else {
-                      PUSHVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
+                      PUSHFUNCVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
                   }
               } else {
-                  PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+                  PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
               }
 
         } else if ((now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS)) {
                 //qDebug() << now->leaf_num_;
-                PUSHVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
+                PUSHFUNCVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
                 //qDebug() << func_type[func_type.size() - 1];
 
         } else if (now->leaf_num_ == FREAD) {
             auto vinfo = value2info[args[0]].top(); // FIXME
             if (vinfo->len_ && types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
                 if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
-                    PUSHVULN(start, "", LOW, vinfo->pos_);
+                    PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
                 } else {
-                    PUSHVULN(start, "指定的读入长度大于可用长度", HIGH, vinfo->pos_);
+                    PUSHFUNCVULN(start, "指定的读入长度大于可用长度", HIGH, vinfo->pos_);
                 }
             } else {
-                PUSHVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+                PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
             }
 
         } else if (now->leaf_num_ == MALLOC) { // FIXME

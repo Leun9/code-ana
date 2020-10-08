@@ -23,13 +23,13 @@ namespace kernel {
 
 /*** 敏感函数 ***/
 #define VULN_FUNC_LIST \
-{"strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
+{"", "strcpy", "wcscpy", "strncpy", "wcsncpy", "memcpy", "memset", "strcat", "strncat", "wcscat", "wcsncat", \
 "gets", "fread", \
 "scanf", "sscanf", "fscanf", "vscanf", "vsscanf", "vfscanf", \
 "printf", "sprintf", "fprintf", "vprintf", "vsprintf", "vfprintf", \
 "malloc", "calloc", "realloc", "free"}
 
-enum {STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT, WCSNCAT,
+enum {NONE, STRCPY, WCSCPY, STRNCPY, WCSNCPY, MEMCPY, MEMSET, STRCAT, STRNCAT, WCSCAT, WCSNCAT,
       GETS, FREAD,
       SCANF, SSCANF, FSCANF, VSCANF, VSSCANF, VFSCANF,
       PRINTF, SPRINTF, FPRINTF, VPRINTF, VSPRINTF, VFPRINTF,
@@ -44,7 +44,7 @@ enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
 enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
 
 /*** 漏洞类型 ***/
-enum {BUFOF, STACKOF, HEAPOF, FORMATSTR};
+enum {BUFOF, STACKOF, HEAPOF, FORMATSTR, WIDTHOF};
 
 /*** 格式化字符串类型 ***/
 enum {FMT_d, FMT_o, FMT_x, FMT_X, FMT_u, FMT_f, FMT_e, FMT_E, FMT_g, FMT_G, FMT_c, FMT_s, FMT_p,

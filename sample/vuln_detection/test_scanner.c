@@ -111,6 +111,14 @@ void f6() { // 测试printf
   //printf("[%*.*dabcd] [%*.*lfabcd]", 2, 2, 1, 4, 2, 1.0);
 }
 
+void f7() {
+  char x;
+  int y;
+  short z;
+  z = x;
+  z = y;
+}
+
 /*** test block comment ***/
 int main(int argc, char *argv[]) {
   //gets();
