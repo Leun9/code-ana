@@ -116,6 +116,8 @@ void f7() {
   int y;
   short z;
   z = x;
+  z = 2 * (x + 1);
+  z = 2 * (y + 1);
   z = y;
 }
 

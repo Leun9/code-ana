@@ -18,16 +18,17 @@ Trie::Trie(const std::initializer_list<string> &lst) {
 }
 
 bool Trie::Jump(Trie::TrieNode* &now, char ch) {
-  if (now->next_.find(ch) == now->next_.end()) {
-    return false;
+  auto it = now->next_.find(ch);
+  if (it == now->next_.end()) {
+      return false;
   } else {
-    now = now->next_[ch]; // FIXME 重复计算hash
+    now = it->second;
     return true;
   }
 }
 
 void Trie::Insert(string str) {
-  if (str.size() == 0) return;
+  if (str.size() == 0) {++leaf_cnt_; return;}
   TrieNode* now = root_;
   for (size_t i = 0; i < str.size(); ++i) {
     if (now->next_.find(str[i]) == now->next_.end()) {

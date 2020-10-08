@@ -1,4 +1,4 @@
-#include "vuln_scan.h"
+﻿#include "vuln_scan.h"
 
 #include <string>
 #include <vector>
@@ -158,7 +158,7 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
     } \
 
-#define CHECK_SCANF_FMT(MAGIC)
+#define CHECK_SCANF_FMT(MAGIC) ;
 
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {
@@ -173,6 +173,8 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
 
   int deep = 0;
   for (size_t i = func_start; i < func_end;) {
+
+    qDebug() << "[INFO0]" << i << str[i];
     while (!ISIDCHAR(str[i]) && i < func_end) {
         //qDebug() << vinfo_it->name_.c_str() << vinfo_it->start_;
         while (vinfo_it != value_infos.end() && i >= vinfo_it->start_) {
@@ -203,8 +205,6 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 if (it == value_infos.begin()) break;
             }
         } else if (str[i] == '=') { // 宽度溢出：赋值符号右边有宽度大于左边的变量
-            qDebug() << "HERE1";
-            // 赋值运算
             size_t j = i;
             while (!ISIDCHAR(str[j])) --j;
             size_t start = j;
@@ -215,83 +215,98 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
 
 
             if (str[i-1] != '>' && str[i-1] != '<' && str[i+1] != '=') {
-                qDebug() << "HERE2";
                 while (true) {
-                    while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') ++i, qDebug()<<str[i];
+                    while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') ++i;
                     if (str[i] == ',' || str[i] == ';') break;
                     size_t start = i;
                     while (ISIDCHAR(str[i])) ++i;
+                    if (str[i] == '(') { //FIXME
+                        do {++i;} while (str[i] != ')');
+                        continue;
+                    }
                     auto vit = value2info.find(str.substr(start, i-start));
                     if (vit != value2info.end()) {
                         auto vinfo = vit->second.top();
                         if ((size_t)vinfo->width_ > type2size[lvinfo->type_])
-                            PUSHVULN(start, "宽度溢出", HIGH, WIDTHOF);
+                            PUSHVULN(start, "宽度溢出", MIDDLE, WIDTHOF);
                     }
                 }
-                qDebug() << "HERE3";
             }
-            qDebug() << "HERE4";
 
         }
         ++i;
     }
 
+    qDebug() << "[INFO1]"  << i << str[i];
     size_t start = i;
     Trie::TrieNode* now = buf_vuln_trie.root_;
     while (buf_vuln_trie.Jump(now, str[i])) ++i;
+    qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
 
     if (now->is_leaf_ && !ISIDCHAR(str[i])) {
         vector<string> args;
         vector<int> types;
         vector<size_t> nums;
         GetArg(str, i, args, types, nums);
-        //qDebug() << str.substr(start, i-start).c_str();
+        //qDebug() << str.substr(start, i-start).c_str() << now->leaf_num_;
 
         if (now->leaf_num_  == STRCPY || now->leaf_num_ == WCSCPY) {
-            auto vinfo = value2info[args[0]].top(); // FIXME
-            if (vinfo->len_ && types[0] == VALUE && types[1] == KSTR) {
+            //auto vinfo = value2info[args[0]].top();
+            auto it = value2info.find(args[0]);
+            ValueInfo *vinfo = NULL;
+            if (it != value2info.end() && !it->second.empty()) vinfo = it->second.top();
+            if (vinfo && vinfo->len_ && types[0] == VALUE && types[1] == KSTR) {
                 if (vinfo->len_ * vinfo->size_ >= nums[1]) {
                     PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
                 } else {
                     PUSHFUNCVULN(start, "拷贝的常量字符串长度大于可用长度", HIGH, vinfo->pos_);
                 }
-        } else {
-            PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
-        }
+            } else {
+                PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+            }
 
         } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
-            auto vinfo = value2info[args[0]].top(); // FIXME
-              if (vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
-                  //qDebug() << vinfo->name_.c_str() << vinfo->lelvinfo =USn_ * vinfo->size_ << nums[2];
-                  if (vinfo->len_ * vinfo->size_ >= nums[2]) {
-                      PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
-                  } else {
-                      PUSHFUNCVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
-                  }
+            //auto vinfo = value2info[args[0]].top();
+            auto it = value2info.find(args[0]);
+            ValueInfo *vinfo = NULL;
+            if (it != value2info.end() && !it->second.empty()) vinfo = it->second.top();
+            if (vinfo && vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
+              //qDebug() << vinfo->name_.c_str() << vinfo->lelvinfo =USn_ * vinfo->size_ << nums[2];
+              if (vinfo->len_ * vinfo->size_ >= nums[2]) {
+                  PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
               } else {
-                  PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+                  PUSHFUNCVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
               }
+            } else {
+              PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+            }
 
-        }  else if (now->leaf_num_ == WCSNCPY) {
-            auto vinfo = value2info[args[0]].top(); // FIXME
-              if (vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
-                  if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
-                      PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
-                  } else {
-                      PUSHFUNCVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
-                  }
+        } else if (now->leaf_num_ == WCSNCPY) {
+            //auto vinfo = value2info[args[0]].top();
+            auto it = value2info.find(args[0]);
+            ValueInfo *vinfo = NULL;
+            if (it != value2info.end() && !it->second.empty()) vinfo = it->second.top();
+            if (vinfo && vinfo->len_ && types[0] == VALUE && types[2] == KNUM) {
+              if (vinfo->len_ * vinfo->size_ >= nums[2]*2) {
+                  PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
               } else {
-                  PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+                  PUSHFUNCVULN(start, "指定的拷贝长度大于可用长度", HIGH, vinfo->pos_);
               }
+            } else {
+              PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
+            }
 
-        } else if ((now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS)) {
+        } else if (now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) {
                 //qDebug() << now->leaf_num_;
                 PUSHFUNCVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
                 //qDebug() << func_type[func_type.size() - 1];
 
         } else if (now->leaf_num_ == FREAD) {
-            auto vinfo = value2info[args[0]].top(); // FIXME
-            if (vinfo->len_ && types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
+            //auto vinfo = value2info[args[0]].top();
+            auto it = value2info.find(args[0]);
+            ValueInfo *vinfo = NULL;
+            if (it != value2info.end() && !it->second.empty()) vinfo = it->second.top();
+            if (vinfo && vinfo->len_ && types[0] == VALUE && types[1] == KNUM && types[2] == KNUM) {
                 if (vinfo->len_ * vinfo->size_ >= nums[1] * nums[2]) {
                     PUSHFUNCVULN(start, "", LOW, vinfo->pos_);
                 } else {
@@ -322,7 +337,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             if (types[0] == KNUM && types[1] == KNUM)
                 vinfo->len_ = nums[0] * nums[1] / vinfo->size_;
 
-        }  else if (now->leaf_num_ == REALLOC) { // FIXME
+        } else if (now->leaf_num_ == REALLOC) { // FIXME
             auto vinfo = value2info[args[0]].top();
             vinfo->pos_ = HEAP;
             if (types[1] == KNUM) vinfo->len_ = nums[1] / vinfo->size_;
@@ -348,6 +363,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
     } else {
       while (ISIDCHAR(str[i])) ++i;
     }
+    qDebug() << "[INFO3]"  << i << str[i];
 
   }
 }
