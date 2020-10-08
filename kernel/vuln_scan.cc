@@ -188,8 +188,12 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 while (str[i] != '\n') ++i;
 
         } else if (str[i] == '*') {
-            if (str[i-1] == '/')
-                do {++i;} while (str[i] != '/' || str[i-1] != '*');
+            if (str[i-1] == '/') {
+                do {++i;} while (str[i] != '/' || str[i-1] != '*'); // 注释
+            } else { // FIXME : 更科学地区分乘法和访问
+                if (str[i+1] == ' ')
+                    PUSHVULN(i, "可能存在运算溢出（乘法）漏洞", MIDDLE, WIDTHOF);
+            }
 
         } else if (str[i] == '\"') {
             do {++i;} while (str[i] != '\"' && str[i-1] != '\\');
@@ -213,7 +217,6 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             if (lvit == value2info.end()) {++i; continue;}
             auto lvinfo = lvit->second.top(); // FIXME
 
-
             if (str[i-1] != '>' && str[i-1] != '<' && str[i+1] != '=') {
                 while (true) {
                     while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') ++i;
@@ -228,7 +231,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                     if (vit != value2info.end()) {
                         auto vinfo = vit->second.top();
                         if ((size_t)vinfo->width_ > type2size[lvinfo->type_])
-                            PUSHVULN(start, "宽度溢出", MIDDLE, WIDTHOF);
+                            PUSHVULN(start, "可能存在宽度溢出漏洞", MIDDLE, WIDTHOF);
+                        if (vinfo->unsigned_ != lvinfo->unsigned_)
+                            PUSHVULN(start, "可能存在符号溢出漏洞", MIDDLE, SIGNOF);
                     }
                 }
             }

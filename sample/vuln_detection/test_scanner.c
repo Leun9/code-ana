@@ -121,6 +121,13 @@ void f7() {
   z = y;
 }
 
+void f8() {
+  int a;
+  unsigned int b;
+  a = b;
+  a = (b * 128) >> 1;
+}
+
 /*** test block comment ***/
 int main(int argc, char *argv[]) {
   //gets();

@@ -44,7 +44,7 @@ enum {UNKNOWNTYPE, KSTR, KNUM, VALUE, EXP};
 enum {UNKNOWNLEVEL, LOW, MIDDLE, HIGH};
 
 /*** 漏洞类型 ***/
-enum {BUFOF, STACKOF, HEAPOF, FORMATSTR, WIDTHOF};
+enum {BUFOF, STACKOF, HEAPOF, FORMATSTR, WIDTHOF, SIGNOF};
 
 /*** 格式化字符串类型 ***/
 enum {FMT_d, FMT_o, FMT_x, FMT_X, FMT_u, FMT_f, FMT_e, FMT_E, FMT_g, FMT_G, FMT_c, FMT_s, FMT_p,
