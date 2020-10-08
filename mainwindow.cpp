@@ -25,6 +25,7 @@ using std::string;
 using std::pair;
 using std::sort;
 using std::thread;
+using std::count;
 
 using namespace codeana::kernel;
 
@@ -481,6 +482,7 @@ void MainWindow::on_btnVulnPath_clicked()
     QString qstr = vuln_src_file.readAll();
     ui->teVulnSrc->setText(qstr);
     auto str = qstr.toStdString();
+    string::iterator str_it = str.begin();
     vuln_src_file.close();
 
     FuncInfos func_infos;
@@ -493,6 +495,8 @@ void MainWindow::on_btnVulnPath_clicked()
     vector<int> func_type;
     vector<int> errtype;
     ui->teVulnRes->clear();
+    size_t line_i = 0;
+    size_t line_cnt = 1;
     for (auto &func_info : func_infos) {
         //qDebug() << str.substr(func_info.start_, func_info.end_-func_info.start_+1).c_str();
         ui->teVulnRes->append("\n[Func] " + S2QS(func_info.name_));
@@ -500,9 +504,12 @@ void MainWindow::on_btnVulnPath_clicked()
                     str, func_info.start_, func_info.end_, func_info.value_infos_);
         for (size_t i = 0; i < pos.size(); ++i) {
             //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
-            QString temp = "偏移：" + NUM2QS(pos[i]) +
-                           ", 函数：" + functype2qstr[func_type[i]] +
-                           "，危险等级：" + errlevel2qstr[errlevel[i]];
+            size_t now_i = pos[i];
+            line_cnt += count(str_it + line_i, str_it + now_i, '\n');
+            line_i = now_i;
+            QString temp = "偏移：" + NUM2QS(now_i) + "，行号：" + NUM2QS(line_cnt);
+            if (func_type[i]) temp += "，函数：" + functype2qstr[func_type[i]];
+            temp += "，危险等级：" + errlevel2qstr[errlevel[i]];
             if (errlevel[i] > LOW) temp += "， 漏洞类型：" + errtype2qstr[errtype[i]];
             if  (!info[i].empty()) temp += "， 信息：" + S2QS(info[i]);
             ui->teVulnRes->append(temp);
