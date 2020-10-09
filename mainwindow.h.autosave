@@ -59,6 +59,7 @@ private:
     QElapsedTimer hom_timer_;
     QString hom_src_;
     QStringList hom_dst_path_list_;
+    
 
     list<vector<int>> pos_list_;
     list<vector<string>> info_list_;

@@ -485,29 +485,59 @@ void MainWindow::on_btnVulnPath_clicked()
     string::iterator str_it = str.begin();
     vuln_src_file.close();
 
-    FuncInfos func_infos;
     ValueInfos global_values;
-    GetFuncInfos(func_infos, global_values, str);
+    GetFuncInfos(func_infos_, global_values, str);
 
-    vector<int> pos;
-    vector<string> info;
-    vector<int> errlevel;
-    vector<int> func_type;
-    vector<int> errtype;
     ui->teVulnRes->clear();
-    size_t line_i = 0;
-    size_t line_cnt = 1;
     for (auto &func_info : func_infos) {
         //qDebug() << str.substr(func_info.start_, func_info.end_-func_info.start_+1).c_str();
-        ui->teVulnRes->append("\n[Func] " + S2QS(func_info.name_));
+
+        vector<int> pos;
+        vector<string> info;
+        vector<int> errlevel;
+        vector<int> func_type;
+        vector<int> errtype;
+        vector<int> line;
         BufVulnScan(pos, func_type, info, errlevel, errtype,
                     str, func_info.start_, func_info.end_, func_info.value_infos_);
+
+        size_t line_i = 0;
+        size_t line_cnt = 1;
         for (size_t i = 0; i < pos.size(); ++i) {
             //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
             size_t now_i = pos[i];
             line_cnt += count(str_it + line_i, str_it + now_i, '\n');
             line_i = now_i;
-            QString temp = "偏移：" + NUM2QS(now_i) + "，行号：" + NUM2QS(line_cnt);
+            line.push_back(line_cnt);
+        }
+        line_list_.push_back(line);
+        pos_list_.push_back(pos);
+        info_list_.push_back(info);
+        errlevel_list_.push_back(errlevel);
+        func_type_list_.push_back(func_type);
+        errlevel_list_.push_back(errlevel);
+    }
+    RefreshVulnScan();
+}
+
+void MainWindow::RefreshVulnScan() {
+    auto pit = pos_list_.begin();
+    auto iit = info_list_.begin();
+    auto eit = errlevel_list_.begin();
+    auto fit = func_type_list_.begin();
+    auto rit = errtype_list_.begin();
+    auto lit = line_list_.begin();
+    for (size_t i = 0; i < pos_list_.size(); ++i) {
+        auto pos = *pit; ++pit;
+        auto info = *iit; ++iit;
+        auto errlevel = *eit; ++eit;
+        auto func_type = *fit; ++fit;
+        auto errtype = *rit; ++rit;
+        auto line = *lit; ++lit;
+        for (size_t i = 0; i < pos.size(); ++i) {
+            //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
+            size_t now_i = pos[i];
+            QString temp = "偏移：" + NUM2QS(now_i) + "，行号：" + NUM2QS(line[i]);
             if (func_type[i]) temp += "，函数：" + functype2qstr[func_type[i]];
             temp += "，危险等级：" + errlevel2qstr[errlevel[i]];
             if (errlevel[i] > LOW) temp += "， 漏洞类型：" + errtype2qstr[errtype[i]];
@@ -515,5 +545,4 @@ void MainWindow::on_btnVulnPath_clicked()
             ui->teVulnRes->append(temp);
         }
     }
-
 }
