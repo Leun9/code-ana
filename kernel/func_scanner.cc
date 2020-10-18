@@ -30,6 +30,7 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
     FuncInfo func_info;
 
     for (size_t i = 0; i < code_size; ++i) {
+        //qDebug() << "[" << str[i] << "]" << str.substr(i, 50).c_str();
 
         if (str[i] == '/') {
             if (str[i-1] == '/')
@@ -40,13 +41,16 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
                 do {++i;} while (str[i] != '/' || str[i-1] != '*');
 
         } else if (str[i] == '\"') {
-            do {++i;} while (str[i] != '\"' && str[i-1] != '\\');
+            do {++i;} while (str[i] != '\"' || str[i-1] == '\\');
 
         } else if (str[i] == '{') { // FIXME : 未考虑注释的特殊情况
             ++deep;
+            //qDebug() << str.substr(i, 20).c_str();
+            //qDebug() << "deep" << deep;
 
         } else if (str[i] == '}') { // 压入函数信息
             --deep;
+            //qDebug() << str.substr(i, 20).c_str();
             //qDebug() << "deep" << deep;
             // 处理变量的end
             for (auto it = func_info.value_infos_.rbegin(); it != func_info.value_infos_.rend(); ++it) {
@@ -66,7 +70,9 @@ void GetFuncInfos(FuncInfos &func_infos, ValueInfos &global_values, string &str)
 
         } else {
             // 找变量 : "类型 标识符;" 或 "类型 标识符 = ;"
+            //qDebug() << str.substr(i, 50).c_str();
             if (!ISIDCHAR(str[i])) continue;
+            //qDebug() << str.substr(i, 50).c_str();
             size_t j = i;
             while (ISIDCHAR(str[i])) ++i;
             string token(str.substr(j, i - j));
@@ -138,6 +144,8 @@ if (deep == 0)  {
 do {++i;} while (ISBLANK(str[i]));
 if (str[i] == '{') { // 实现
     ++deep;
+    //qDebug() << str.substr(i, 20).c_str();
+    //qDebug() << "deep" << deep;
     in_func = 1;
 } else { // 否则是声明
     while (func_info.value_infos_.back().deep_ == 1) func_info.value_infos_.pop_back();
@@ -181,6 +189,7 @@ if (str[i] == '{') { // 实现
                     width = type2size[str2type[type]];
                     size = 0;
                 }
+                //qDebug() << "HERE";
                 func_info.value_infos_.push_back(ValueInfo(name, start, end, deep, unsign,
                                                            str2type[type], width, isp, isa, size, len, pos));
                 while (str[i] != ',' && str[i] != ';' && str[i] != '\"' && str[i] != '{') ++i;

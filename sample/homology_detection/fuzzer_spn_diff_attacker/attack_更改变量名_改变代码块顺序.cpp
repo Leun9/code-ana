@@ -32,26 +32,26 @@ int llIIIlll[65536];
 int IlIIIlll[65536], lIIIIlll[65536], IIIIIlll[65536], lllllIll[65536];
 int IllllIll[65536];
 
-inline void IIlllllI() ;
-inline void lIlllllI() ;
-inline void IllllllI() ;
+inline void preprocess() ;
+inline void preprocess24() ;
+inline void preprocess134() ;
 char lIlllIll[16];
-inline int lllllllI() ;
+inline int get16bit() ;
 
 
 int main()
 {
-  IIlllllI();
+  preprocess();
   int IIlllIll,llIllIll,IlIllIll;
   scanf("%d",&IIIlllll);
   getchar();
   for (IlIllIll = 0; IlIllIll < IIIlllll; ++IlIllIll)
   {
-  for (IIlllIll = 0; IIlllIll < 65536; ++IIlllIll) IllllIll[IIlllIll] = lllllllI();
+  for (IIlllIll = 0; IIlllIll < 65536; ++IIlllIll) IllllIll[IIlllIll] = get16bit();
   int lIIllIll = 0;
 
   // first 8 bit
-  lIlllllI();
+  preprocess24();
   memset(IIlIIlll, 0, 256 * sizeof(int));
   for (IIlllIll = 0; IIlllIll < 80; ++IIlllIll) {
     for (l = 0; l <= 0xff; ++l) {
@@ -72,7 +72,7 @@ int main()
     }
     }
     IIlIIlll[IIllIlll] = 0;
-    IllllllI();
+    preprocess134();
     memset(llIIIlll, 0, 256 * sizeof(int));
     for (IIlllIll = 0; IIlllIll < 240; ++IIlllIll) {
       for (l = 0; l <= 0xff; ++l) {
@@ -125,7 +125,7 @@ int main()
 }
 
 
-int lllllllI() {
+inline int get16bit() {
   for (int IIlllIll = 0; IIlllIll < 4; ) {
     lIlllIll[IIlllIll] = getchar();
     if (lIlllIll[IIlllIll] >= '0' && lIlllIll[IIlllIll] <= '9') {
@@ -140,7 +140,7 @@ int lllllllI() {
   return (lIlllIll[0] << 12) | (lIlllIll[1] << 8) | (lIlllIll[2] << 4) | lIlllIll[3];
 }
 
-void IllllllI() {
+inline void preprocess134() {
   int IlIllIll=0;
   while (IlIllIll < 240) {
     IIlIllll[IlIllIll] = rand()%65536;
@@ -151,7 +151,7 @@ void IllllllI() {
   }
 }
 
-void lIlllllI() {
+inline void preprocess24() {
   int IlIllIll=0;
   while (IlIllIll < 80) {
     IIlIllll[IlIllIll] = rand()%65536;
@@ -162,7 +162,7 @@ void lIlllllI() {
   }
 }
 
-void IIlllllI() {
+inline void preprocess() {
   for (int IIlllIll = 0; IIlllIll < 65536; ++IIlllIll) {
     IlIIIlll[IIlllIll] = (lllIllll[IIlllIll>>12]<<12) | (lllIllll[(IIlllIll>>8)&0xf]<<8) | (lllIllll[(IIlllIll>>4)&0xf]<<4) | (lllIllll[IIlllIll&0xf]);
     IIIIIlll[IlIIIlll[IIlllIll]] = IIlllIll;

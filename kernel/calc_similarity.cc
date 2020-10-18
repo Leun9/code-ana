@@ -28,7 +28,7 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
       len.push_back(dp[src_size-1]);
     }
     for (size_t j = src_size - 1; j != 0; --j) {
-      //if (src[j] == "") { // FIXME : 处理空行
+      //if (src[j] == "") {dp[j] = dp[j-1]; continue;}// FIXME : 处理空行
       if (dst[i] == src[j]) {
         dp[j] = dp[j - 1] + 1;
       } else {
@@ -60,8 +60,16 @@ void CalcTokensSimlarity(vector<string> &src, vector<string> &dst, size_t min_si
 
   // 后处理结果，排序并使相似代码块不重叠。
   vector<pair<pair<size_t, size_t>, size_t>> temp;
-  for (size_t i = 0; i < dst_pos.size(); ++i)
+  for (size_t i = 0; i < dst_pos.size(); ++i) {
+      int start = dst_pos[i];
+      int end = start + len[i] - 1;
+      int llen = len[i];
+      while (end > start && dst[end--].empty()) llen--;
+      while (start < end && dst[start++].empty()) llen--;
+      if (llen < min_size) continue;
       temp.push_back(pair< pair<size_t, size_t>, size_t>(pair<size_t, size_t>(dst_pos[i], -len[i]), i));
+
+    }
   sort(temp.begin(), temp.end());
   auto src_pos_temp = src_pos;
   auto dst_pos_temp = dst_pos;

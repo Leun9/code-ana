@@ -32,26 +32,26 @@ int cns[65536];
 int s[65536], p[65536], r[65536], q[65536];
 int cipher[65536];
 
-inline void preprocess() ;
-inline void preprocess24() ;
-inline void preprocess134() ;
+inline void IIlllllI() ;
+inline void lIlllllI() ;
+inline void IllllllI() ;
 char buf[16];
-inline int get16bit() ;
+inline int lllllllI() ;
 
 
 int main()
 {
-  preprocess();
+  IIlllllI();
   int i,j,k;
   scanf("%d",&n);
   getchar();
   for (k = 0; k < n; ++k)
   {
-  for (i = 0; i < 65536; ++i) cipher[i] = get16bit();
+  for (i = 0; i < 65536; ++i) cipher[i] = lllllllI();
   int find = 0;
 
   // first 8 bit
-  preprocess24();
+  lIlllllI();
   memset(cnt, 0, 256 * sizeof(int));
   for (i = 0; i < 80; ++i) {
     for (l = 0; l <= 0xff; ++l) {
@@ -72,7 +72,7 @@ int main()
     }
     }
     cnt[maxkey24] = 0;
-    preprocess134();
+    IllllllI();
     memset(cns, 0, 256 * sizeof(int));
     for (i = 0; i < 240; ++i) {
       for (l = 0; l <= 0xff; ++l) {
@@ -125,7 +125,7 @@ int main()
 }
 
 
-int get16bit() {
+inline int lllllllI() {
   for (int i = 0; i < 4; ) {
     buf[i] = getchar();
     if (buf[i] >= '0' && buf[i] <= '9') {
@@ -140,7 +140,7 @@ int get16bit() {
   return (buf[0] << 12) | (buf[1] << 8) | (buf[2] << 4) | buf[3];
 }
 
-void preprocess134() {
+inline void IllllllI() {
   int k=0;
   while (k < 240) {
     x[k] = rand()%65536;
@@ -151,7 +151,7 @@ void preprocess134() {
   }
 }
 
-void preprocess24() {
+inline void lIlllllI() {
   int k=0;
   while (k < 80) {
     x[k] = rand()%65536;
@@ -162,7 +162,7 @@ void preprocess24() {
   }
 }
 
-void preprocess() {
+inline void IIlllllI() {
   for (int i = 0; i < 65536; ++i) {
     s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]);
     r[s[i]] = i;

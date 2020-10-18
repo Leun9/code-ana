@@ -21,11 +21,8 @@
 namespace TEST {
 
 /***
-
  * TEST /*
-
  * TEST /* 
-
  ***/
 
 }

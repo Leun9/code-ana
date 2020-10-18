@@ -249,7 +249,7 @@ int main()
 
 
 
-int get16bit() {
+inline int get16bit() {
 
   for (int i = 0; i < 4; ) {
 
@@ -279,7 +279,7 @@ int get16bit() {
 
 
 
-void preprocess134() {
+inline void preprocess134() {
 
   int k=0;
 
@@ -301,7 +301,7 @@ void preprocess134() {
 
 
 
-void preprocess24() {
+inline void preprocess24() {
 
   int k=0;
 
@@ -323,7 +323,7 @@ void preprocess24() {
 
 
 
-void preprocess() {
+inline void preprocess() {
 
   for (int i = 0; i < 65536; ++i) {
 

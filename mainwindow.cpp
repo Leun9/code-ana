@@ -106,8 +106,11 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         }
         double rate = 0;
         //qDebug() << len_sum << dst_tokens.size();
-        if (dst_tokens.size() | src_tokens.size()) {
-            rate = 100 * ((double)(len_sum << 1) / (src_tokens.size() + dst_tokens.size()));
+        int dst_tokens_size = 0;
+        for (auto &token : dst_tokens)
+                if (!token.empty()) dst_tokens_size++;
+        if (dst_tokens_size) {
+            rate = 100 * ((double)len_sum / dst_tokens_size);
             if (rate > 100) rate = 100;
         }
         //qDebug() << rate;
@@ -139,8 +142,8 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         size_t len_sum = 0;
         for (auto i : len) len_sum += i;
         double rate = 0;
-        if (dst_str.size() | src_str.size()) {
-            rate = 100 * ((double) (len_sum << 1) / (src_str.size() + dst_str.size()));
+        if (dst_str.size()) {
+            rate = 100 * ((double) len_sum / dst_str.size());
         }
         info2_buf.append("  相似度（CFG）: " + NUM2QS(rate, 'f', 1) + "%\n\n");
     }
@@ -277,7 +280,7 @@ void MainWindow::on_btnCfgSrcPath_clicked()
     }
     for (auto &i : func2subfunc) {
         auto func_name = i.first;
-        if (func_name == "main") break;
+        if (func_name == "main") continue;
         auto subfunc = i.second;
         size_t start = func_pos[func_name].first;
         size_t end = func_pos[func_name].second;
@@ -409,6 +412,7 @@ void MainWindow::on_btnFunPath_clicked()
     GetFuncInfos(func_infos, global_values, str);
 
     ui->teFuncRes->clear();
+    //ui->teFuncRes->append(NUM2QS(func_infos.size()));
     if (!global_values.empty()) {
         ui->teFuncRes->append("[全局变量]：\n");
         for (auto &v : global_values) {
@@ -565,6 +569,7 @@ void MainWindow::on_btnFuzzer_clicked()
       if (func) file_path += "_更改函数名";
       if (newline) file_path += "_增加空行";
       if (order) file_path += "_改变代码块顺序";
+      if (i == 0) file_path = file_path + "_完全拷贝";
       file_path = file_path + "." + qlist[1];
       QFile file(file_path);
       if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {

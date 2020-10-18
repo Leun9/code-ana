@@ -63,15 +63,15 @@ int IllllIll[65536];
 
 
 
-inline void IIlllllI() ;
+inline void preprocess() ;
 
-inline void lIlllllI() ;
+inline void preprocess24() ;
 
-inline void IllllllI() ;
+inline void preprocess134() ;
 
 char lIlllIll[16];
 
-inline int lllllllI() ;
+inline int get16bit() ;
 
 
 
@@ -81,7 +81,7 @@ int main()
 
 {
 
-  IIlllllI();
+  preprocess();
 
   int IIlllIll,llIllIll,IlIllIll;
 
@@ -93,7 +93,7 @@ int main()
 
   {
 
-  for (IIlllIll = 0; IIlllIll < 65536; ++IIlllIll) IllllIll[IIlllIll] = lllllllI();
+  for (IIlllIll = 0; IIlllIll < 65536; ++IIlllIll) IllllIll[IIlllIll] = get16bit();
 
   int lIIllIll = 0;
 
@@ -101,7 +101,7 @@ int main()
 
   // first 8 bit
 
-  lIlllllI();
+  preprocess24();
 
   memset(IIlIIlll, 0, 256 * sizeof(int));
 
@@ -143,7 +143,7 @@ int main()
 
     IIlIIlll[IIllIlll] = 0;
 
-    IllllllI();
+    preprocess134();
 
     memset(llIIIlll, 0, 256 * sizeof(int));
 
@@ -249,7 +249,7 @@ int main()
 
 
 
-int lllllllI() {
+inline int get16bit() {
 
   for (int IIlllIll = 0; IIlllIll < 4; ) {
 
@@ -279,7 +279,7 @@ int lllllllI() {
 
 
 
-void IllllllI() {
+inline void preprocess134() {
 
   int IlIllIll=0;
 
@@ -301,7 +301,7 @@ void IllllllI() {
 
 
 
-void lIlllllI() {
+inline void preprocess24() {
 
   int IlIllIll=0;
 
@@ -323,7 +323,7 @@ void lIlllllI() {
 
 
 
-void IIlllllI() {
+inline void preprocess() {
 
   for (int IIlllIll = 0; IIlllIll < 65536; ++IIlllIll) {
 

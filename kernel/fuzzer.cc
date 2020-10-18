@@ -54,8 +54,7 @@ void fuzzer(string &res, string &str_raw, bool value, bool func, bool newline, b
             str.push_back('\n');
             str.push_back('\n');
             int start = f.start_-1;
-            while (!ISIDCHAR(str_raw[start])) start--;
-            while (ISIDCHAR(str_raw[start])) start--;
+            while (str_raw[start] != '\n') start--;
             str.append(str_raw.substr(start+1, f.end_-start));
         }
 
@@ -86,7 +85,7 @@ void fuzzer(string &res, string &str_raw, bool value, bool func, bool newline, b
             }
 
         } else if (str[i] == '\"') {
-            do {res.push_back(str[i]); ++i;} while (str[i] != '\"' && str[i-1] != '\\');
+            do {res.push_back(str[i]); ++i;} while (str[i] != '\"' || str[i-1] == '\\');
 
         } else if (str[i] == '\'') {
             res.push_back(str[i++]);
