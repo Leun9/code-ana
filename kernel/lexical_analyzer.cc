@@ -165,10 +165,11 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
   size_t str_size = str.size();
   for (size_t i = 0; i <= str_size; ++i) {
     if (i == str_size) ch = 0; else ch = str[i]; // FIXME
-    //qDebug() << ch;
+    size_t chd = ch&255;
+    //qDebug() << str.substr(i,20).c_str() << ((size_t)ch&255) << now << now->edges[chd] << "[" << block_comment_ << block_comment2_;
     if (ch == '\t') continue;
-    if (now->edges.count(ch) != 0) {
-      now = now->edges[ch];
+    if (now->edges[chd] != 0) {
+      now = now->edges[chd]; //qDebug() << "HERE 1:" << i << ch;
       if (now == block_comment_newline_) {
         //line_token.push_back(encode_["COMMENT_"]); // filter comment
         result.push_back(line_token);
@@ -178,6 +179,7 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
       token_buf.push_back(ch);
       continue;
     }
+
     // FIXME : token analysis
     if (now == start_) {
       PRTERROR;
@@ -202,8 +204,9 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
         vector<string> result_temp;
         GetStringTokens(result_temp, define_str);
         define_map[str.substr(id_start, id_len)] = result_temp[0];
-        line_token.push_back(encode_["define"]);
-        result.push_back(line_token);
+        //line_token.push_back(encode_["define"]);
+        //result.push_back(line_token);
+        result.push_back("");
         line_token.clear();
         token_buf.clear();
       } else if (define_map.count(token_buf)) {
@@ -241,7 +244,7 @@ void LexicalAnalyzer::GetStringTokens(vector<string> &result, const string &str)
     } else if (now == keep_char_) {
       line_token.push_back(encode_[token_buf]);
     }
-    now = start_->edges[ch];
+    now = start_->edges[chd]; //qDebug() << "HERE 2";
     token_buf = ch;
   };
   result.push_back(line_token);
@@ -266,9 +269,10 @@ void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2to
     bool in_func = false;
     for (size_t i = 0; i <= str_size; ++i) {
       if (i == str_size) ch = 0; else ch = str[i]; // FIXME
+      size_t chd = ch&255;
       if (ch == '\t') continue;
-      if (now->edges.count(ch) != 0) {
-        now = now->edges[ch];
+      if (now->edges[chd] != 0) {
+        now = now->edges[chd];
         if (now == line_comment_ || now == block_comment_ || now == block_comment3_) {
             str[i] = ' ';
             str[i-1] = ' ';
@@ -296,7 +300,7 @@ void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2to
           vector<string> result_temp;
           GetStringTokens(result_temp, define_str);
           define_map[str.substr(id_start, id_len)] = result_temp[0];
-          func_token.push_back(encode_["define"]);
+          //func_token.push_back(encode_["define"]);
         } else if (define_map.count(token_buf)) {
           func_token.append(define_map[token_buf]);
         } else if (keywords_.count(token_buf)) {
@@ -351,7 +355,7 @@ void LexicalAnalyzer::GetStringFuncTokens(unordered_map<string, string> &func2to
         }
         func_token.push_back(encode_[token_buf]);
       }
-      now = start_->edges[ch];
+      now = start_->edges[chd];
       token_buf = ch;
     };
     for (auto &func_posi : func_pos) {

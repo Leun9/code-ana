@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <cstring>
 
 using std::unordered_map;
 using std::unordered_set;
@@ -43,8 +44,9 @@ class LexicalAnalyzer {
 
  private:
   struct Node {
-    Node() : edges(unordered_map<char, Node*>(256)) {};
-    unordered_map<char, Node*> edges;
+    Node() {memset(edges, 0, sizeof(Node*)*256);};
+    Node* edges[256];
+    //unordered_map<char, Node*> edges;
   };
 
  public:

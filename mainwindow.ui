@@ -276,6 +276,53 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="pFuzzer">
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label_14">
+          <property name="text">
+           <string>文本：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLineEdit" name="leFuzzer"/>
+        </item>
+        <item row="0" column="2">
+         <widget class="QPushButton" name="btnFuzzer">
+          <property name="text">
+           <string>选择</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QLabel" name="label_15">
+          <property name="text">
+           <string>代码混淆：</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>312</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" colspan="3">
+         <widget class="QTextBrowser" name="teFuzzer"/>
+        </item>
+        <item row="1" column="3" colspan="2">
+         <widget class="QTextBrowser" name="teFuzzerInfo"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -313,6 +360,7 @@
    <addaction name="actionHomDet"/>
    <addaction name="actionFuncScan"/>
    <addaction name="actionVulnDet"/>
+   <addaction name="actionFuzzer"/>
   </widget>
   <action name="actionLexAna">
    <property name="text">
@@ -337,6 +385,11 @@
   <action name="actionVulnDet">
    <property name="text">
     <string>漏洞检测</string>
+   </property>
+  </action>
+  <action name="actionFuzzer">
+   <property name="text">
+    <string>代码混淆</string>
    </property>
   </action>
  </widget>

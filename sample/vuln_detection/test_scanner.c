@@ -125,10 +125,14 @@ void f7() {
 }
 
 void f8() {
-  int a;
-  unsigned int b;
-  a = b;
-  a = (b * 128) >> 1;
+  int aaaaa;
+  unsigned int bbbbb;
+  aaaaa = bbbbb;
+  int ddddd = (aaaaa * 128) >> 1;
+  unsigned int ccccc = aaaaa;
+  memcpy(p, v2, aaaaa);
+  memcpy(p, v2, ccccc);
+  memcpy(p, v2, ddddd);
 }
 
 /*** test block comment ***/

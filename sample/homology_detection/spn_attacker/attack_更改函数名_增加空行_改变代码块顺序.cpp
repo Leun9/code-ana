@@ -63,97 +63,15 @@ int cipher[65536];
 
 
 
-inline void preprocess() {
+inline void IIlllllI() ;
 
-  for (int i = 0; i < 65536; ++i) {
+inline void lIlllllI() ;
 
-    s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]);
-
-    r[s[i]] = i;
-
-    p[i] = 0;
-
-    for (int j = 0; j < 16; ++j) { // FIXME
-
-      if (pow2[j] & i) p[i] |= pow2[pi_p[j]];
-
-    }
-
-    q[p[i]] = i;
-
-  }
-
-}
-
-inline void preprocess24() {
-
-  int k=0;
-
-  while (k < 80) {
-
-    x[k] = rand()%65536;
-
-    x1[k] = x[k]^0x0b00;
-
-    y[k] = cipher[x[k]];
-
-    y1_[k] = cipher[x1[k]];
-
-    if(!((y[k]^y1_[k])&0xf0f0)) ++k;
-
-  }
-
-}
-
-inline void preprocess134() {
-
-  int k=0;
-
-  while (k < 240) {
-
-    x[k] = rand()%65536;
-
-    x1[k] = x[k]^0x0f00;
-
-    y[k] = cipher[x[k]];
-
-    y1_[k] = cipher[x1[k]];
-
-    if(!((y[k]^y1_[k])&0x0f00)) ++k;
-
-  }
-
-}
+inline void IllllllI() ;
 
 char buf[16];
 
-inline int get16bit() {
-
-  for (int i = 0; i < 4; ) {
-
-    buf[i] = getchar();
-
-    if (buf[i] >= '0' && buf[i] <= '9') {
-
-      buf[i] -= '0';
-
-      i++;
-
-    } else if (buf[i] >= 'a' && buf[i] <= 'z') {
-
-      buf[i] += 10 - 'a';
-
-      i++;
-
-    }
-
-  }
-
-  getchar();
-
-  return (buf[0] << 12) | (buf[1] << 8) | (buf[2] << 4) | buf[3];
-
-}
+inline int lllllllI() ;
 
 
 
@@ -163,7 +81,7 @@ int main()
 
 {
 
-  preprocess();
+  IIlllllI();
 
   int i,j,k;
 
@@ -175,7 +93,7 @@ int main()
 
   {
 
-  for (i = 0; i < 65536; ++i) cipher[i] = get16bit();
+  for (i = 0; i < 65536; ++i) cipher[i] = lllllllI();
 
   int find = 0;
 
@@ -183,7 +101,7 @@ int main()
 
   // first 8 bit
 
-  preprocess24();
+  lIlllllI();
 
   memset(cnt, 0, 256 * sizeof(int));
 
@@ -225,7 +143,7 @@ int main()
 
     cnt[maxkey24] = 0;
 
-    preprocess134();
+    IllllllI();
 
     memset(cns, 0, 256 * sizeof(int));
 
@@ -327,3 +245,102 @@ int main()
 
 }
 
+
+
+
+
+int lllllllI() {
+
+  for (int i = 0; i < 4; ) {
+
+    buf[i] = getchar();
+
+    if (buf[i] >= '0' && buf[i] <= '9') {
+
+      buf[i] -= '0';
+
+      i++;
+
+    } else if (buf[i] >= 'a' && buf[i] <= 'z') {
+
+      buf[i] += 10 - 'a';
+
+      i++;
+
+    }
+
+  }
+
+  getchar();
+
+  return (buf[0] << 12) | (buf[1] << 8) | (buf[2] << 4) | buf[3];
+
+}
+
+
+
+void IllllllI() {
+
+  int k=0;
+
+  while (k < 240) {
+
+    x[k] = rand()%65536;
+
+    x1[k] = x[k]^0x0f00;
+
+    y[k] = cipher[x[k]];
+
+    y1_[k] = cipher[x1[k]];
+
+    if(!((y[k]^y1_[k])&0x0f00)) ++k;
+
+  }
+
+}
+
+
+
+void lIlllllI() {
+
+  int k=0;
+
+  while (k < 80) {
+
+    x[k] = rand()%65536;
+
+    x1[k] = x[k]^0x0b00;
+
+    y[k] = cipher[x[k]];
+
+    y1_[k] = cipher[x1[k]];
+
+    if(!((y[k]^y1_[k])&0xf0f0)) ++k;
+
+  }
+
+}
+
+
+
+void IIlllllI() {
+
+  for (int i = 0; i < 65536; ++i) {
+
+    s[i] = (pi_s[i>>12]<<12) | (pi_s[(i>>8)&0xf]<<8) | (pi_s[(i>>4)&0xf]<<4) | (pi_s[i&0xf]);
+
+    r[s[i]] = i;
+
+    p[i] = 0;
+
+    for (int j = 0; j < 16; ++j) { // FIXME
+
+      if (pow2[j] & i) p[i] |= pow2[pi_p[j]];
+
+    }
+
+    q[p[i]] = i;
+
+  }
+
+}

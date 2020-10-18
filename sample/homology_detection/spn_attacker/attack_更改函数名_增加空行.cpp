@@ -63,7 +63,7 @@ int cipher[65536];
 
 
 
-inline void preprocess() {
+inline void lllllllI() {
 
   for (int i = 0; i < 65536; ++i) {
 
@@ -85,7 +85,7 @@ inline void preprocess() {
 
 }
 
-inline void preprocess24() {
+inline void IllllllI() {
 
   int k=0;
 
@@ -105,7 +105,7 @@ inline void preprocess24() {
 
 }
 
-inline void preprocess134() {
+inline void lIlllllI() {
 
   int k=0;
 
@@ -127,7 +127,7 @@ inline void preprocess134() {
 
 char buf[16];
 
-inline int get16bit() {
+inline int IIlllllI() {
 
   for (int i = 0; i < 4; ) {
 
@@ -163,7 +163,7 @@ int main()
 
 {
 
-  preprocess();
+  lllllllI();
 
   int i,j,k;
 
@@ -175,7 +175,7 @@ int main()
 
   {
 
-  for (i = 0; i < 65536; ++i) cipher[i] = get16bit();
+  for (i = 0; i < 65536; ++i) cipher[i] = IIlllllI();
 
   int find = 0;
 
@@ -183,7 +183,7 @@ int main()
 
   // first 8 bit
 
-  preprocess24();
+  IllllllI();
 
   memset(cnt, 0, 256 * sizeof(int));
 
@@ -225,7 +225,7 @@ int main()
 
     cnt[maxkey24] = 0;
 
-    preprocess134();
+    lIlllllI();
 
     memset(cns, 0, 256 * sizeof(int));
 

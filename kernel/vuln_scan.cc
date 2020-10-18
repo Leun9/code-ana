@@ -191,6 +191,26 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); \
     } \
 
+#define CHECK_DANG_VALUE(index) \
+{ \
+    string str_tmp = args[index]; \
+    int j = 0; \
+    while (true) { \
+        while (j < str_tmp.size() && !ISIDBEGIN(str_tmp[j])) ++j; \
+        if (j == str_tmp.size()) break; \
+        size_t start_tmp = j; \
+        while (j < str_tmp.size() && ISIDCHAR(str_tmp[j])) ++j; \
+        auto vit = value2info.find(str_tmp.substr(start_tmp, j-start_tmp)); \
+        if (vit != value2info.end()) { \
+            auto vinfo = vit->second.top(); \
+            if (vinfo->unsigned_ != true) \
+                PUSHFUNCVULN(start, "敏感函数参数的隐式转换可能导致符号溢出漏洞:"+vinfo->name_, MIDDLE, SIGNOF); \
+            if (dang_value.count(&*vinfo) != 0) \
+                PUSHFUNCVULN(start, "敏感函数调用可能发生整数溢出的变量:"+vinfo->name_, MIDDLE, BUFOF); \
+        } \
+    } \
+}
+
 void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info, vector<int> &errlevel,
                  vector<int> &errtype, string &str, size_t func_start, size_t func_end, ValueInfos &value_infos) {
   pos.clear();
@@ -200,6 +220,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
   errtype.clear();
 
   unordered_map<string, stack<ValueInfo*>> value2info;
+  unordered_set<ValueInfo*> dang_value;
   auto vinfo_it = value_infos.begin();
 
   int deep = 0;
@@ -221,9 +242,6 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
         } else if (str[i] == '*') {
             if (str[i-1] == '/') {
                 do {++i;} while (str[i] != '/' || str[i-1] != '*'); // 注释
-            } else { // FIXME : 更科学地区分乘法和访问
-                if (str[i+1] == ' ')
-                    PUSHVULN(i, "可能存在运算溢出（乘法）漏洞", MIDDLE, WIDTHOF);
             }
 
         } else if (str[i] == '\"') {
@@ -250,7 +268,13 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
 
             if (str[i-1] != '>' && str[i-1] != '<' && str[i+1] != '=') {
                 while (true) {
-                    while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') ++i;
+                    while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') {
+                        if (str[i] == '*' && str[i+1] == ' ') {
+                            PUSHVULN(i, "可能存在运算溢出（乘法）漏洞", LOW, WIDTHOF);
+                            dang_value.insert(&*lvinfo);
+                        }
+                        ++i;
+                    }
                     if (str[i] == ',' || str[i] == ';') break;
                     size_t start = i;
                     while (ISIDCHAR(str[i])) ++i;
@@ -261,10 +285,14 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                     auto vit = value2info.find(str.substr(start, i-start));
                     if (vit != value2info.end()) {
                         auto vinfo = vit->second.top();
-                        if ((size_t)vinfo->width_ > type2size[lvinfo->type_])
-                            PUSHVULN(start, "可能存在宽度溢出漏洞", MIDDLE, WIDTHOF);
-                        if (vinfo->unsigned_ != lvinfo->unsigned_)
-                            PUSHVULN(start, "可能存在符号溢出漏洞", MIDDLE, SIGNOF);
+                        if ((size_t)vinfo->width_ > type2size[lvinfo->type_]) {
+                            PUSHVULN(start, "可能存在宽度溢出漏洞", LOW, WIDTHOF);
+                            dang_value.insert(&*lvinfo);
+                        }
+                        if (vinfo->unsigned_ != lvinfo->unsigned_) {
+                            PUSHVULN(start, "可能存在符号溢出漏洞", LOW, SIGNOF);
+                            dang_value.insert(&*lvinfo);
+                        }
                     }
                 }
             }
@@ -277,7 +305,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
     size_t start = i;
     Trie::TrieNode* now = buf_vuln_trie.root_;
     while (buf_vuln_trie.Jump(now, str[i])) ++i;
-   //qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
+    //qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
 
     if (now->is_leaf_ && !ISIDCHAR(str[i])) {
         vector<string> args;
@@ -286,7 +314,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
         GetArg(str, i, args, types, nums);
         //qDebug() << str.substr(start, i-start).c_str() << now->leaf_num_;
 
-        if (now->leaf_num_  == STRCPY || now->leaf_num_ == WCSCPY) {
+        switch (now->leaf_num_) {
+        case STRCPY:
+        case WCSCPY: {
             //auto vinfo = value2info[args[0]].top();
             auto it = value2info.find(args[0]);
             ValueInfo *vinfo = NULL;
@@ -301,7 +331,11 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                 PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
             }
 
-        } else if (now->leaf_num_ == STRNCPY || now->leaf_num_ == MEMCPY || now->leaf_num_ == MEMSET) {
+        } break;
+        case STRNCPY:
+        case MEMCPY:
+        case MEMSET: {
+            CHECK_DANG_VALUE(2);
             //auto vinfo = value2info[args[0]].top();
             auto it = value2info.find(args[0]);
             ValueInfo *vinfo = NULL;
@@ -316,8 +350,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             } else {
               PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
             }
-
-        } else if (now->leaf_num_ == WCSNCPY) {
+        } break;
+        case WCSNCPY: {
+            CHECK_DANG_VALUE(2);
             //auto vinfo = value2info[args[0]].top();
             auto it = value2info.find(args[0]);
             ValueInfo *vinfo = NULL;
@@ -332,12 +367,21 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
               PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
             }
 
-        } else if (now->leaf_num_ >= STRCAT && now->leaf_num_ <= GETS) {
-                //qDebug() << now->leaf_num_;
-                PUSHFUNCVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
-                //qDebug() << func_type[func_type.size() - 1];
+        } break;
+        case STRNCAT:
+        case WCSNCAT:
+            CHECK_DANG_VALUE(2);
+        case STRCAT:
+        case WCSCAT:
+        case GETS: {
+            //qDebug() << now->leaf_num_;
+            PUSHFUNCVULN(start, "可能存在漏洞", MIDDLE, BUFOF);
+            //qDebug() << func_type[func_type.size() - 1];
 
-        } else if (now->leaf_num_ == FREAD) {
+        } break;
+        case FREAD: {
+            CHECK_DANG_VALUE(1);
+            CHECK_DANG_VALUE(2);
             //auto vinfo = value2info[args[0]].top();
             auto it = value2info.find(args[0]);
             ValueInfo *vinfo = NULL;
@@ -351,8 +395,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             } else {
                 PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, BUFOF);
             }
-
-        } else if (now->leaf_num_ == MALLOC) { // FIXME
+        } break;
+        case MALLOC: { // FIXME
+            CHECK_DANG_VALUE(0);
             size_t end = i;
             while (str[end] != '=') --end;
             do {--end;} while (ISBLANK(str[end]));
@@ -362,7 +407,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             vinfo->pos_ = HEAP;
             if (types[0] == KNUM) vinfo->len_ = nums[0] / vinfo->size_;
 
-        } else if (now->leaf_num_ == CALLOC) { // FIXME
+        } break;
+        case CALLOC: { // FIXME
+            CHECK_DANG_VALUE(0);
             size_t end = i;
             while (str[end] != '=') --end;
             do {--end;} while (ISBLANK(str[end]));
@@ -373,31 +420,42 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             if (types[0] == KNUM && types[1] == KNUM)
                 vinfo->len_ = nums[0] * nums[1] / vinfo->size_;
 
-        } else if (now->leaf_num_ == REALLOC) { // FIXME
+        } break;
+        case REALLOC: { // FIXME
+            CHECK_DANG_VALUE(0);
             auto vinfo = value2info[args[0]].top();
             vinfo->pos_ = HEAP;
             if (types[1] == KNUM) vinfo->len_ = nums[1] / vinfo->size_;
 
-        } else if (now->leaf_num_ == FREE) { // FIXME
+        } break;
+        case FREE: { // FIXME
             auto vinfo = value2info[args[0]].top();
             vinfo->len_ = 0;
 
-        } else if (now->leaf_num_ == PRINTF){
+        } break;
+        case PRINTF: {
             CHECK_PRINT_FMT(0);
 
-        } else if (now->leaf_num_ == FPRINTF || now->leaf_num_ == SPRINTF){
+        } break;
+        case FPRINTF:
+        case SPRINTF: {
             CHECK_PRINT_FMT(1);
 
-        } else if (now->leaf_num_ == SCANF){
+        } break;
+        case SCANF: {
             CHECK_SCANF_FMT(0);
 
-        } else if (now->leaf_num_ == FSCANF || now->leaf_num_ == SSCANF){
+        } break;
+        case FSCANF:
+        case SSCANF:{
             CHECK_SCANF_FMT(1);
 
+        } break;
+        default:
+            ;
         }
-
     } else {
-      while (ISIDCHAR(str[i])) ++i;
+        while (ISIDCHAR(str[i])) ++i;
     }
    //qDebug() << "[INFO3]"  << i << str[i];
 

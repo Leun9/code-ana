@@ -47,6 +47,10 @@ private slots:
     void on_actionVulnDet_triggered();
     void on_btnVulnPath_clicked();
 
+    void on_actionFuzzer_triggered();
+
+    void on_btnFuzzer_clicked();
+
 private:
     void HomologyDetectionThread(QString hom_dst_path, int mode);
     void HomologyDetection();

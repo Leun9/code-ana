@@ -16,6 +16,7 @@
 #include "kernel/cfg_dfs.h"
 #include "kernel/func_scanner.h"
 #include "kernel/vuln_scan.h"
+#include "kernel/fuzzer.h"
 
 #define S2QS(x) (QString::fromStdString(x))
 #define NUM2QS(...) (QString::number(__VA_ARGS__))
@@ -514,6 +515,64 @@ void MainWindow::on_btnVulnPath_clicked()
             if  (!info[i].empty()) temp += "， 信息：" + S2QS(info[i]);
             ui->teVulnRes->append(temp);
         }
+    }
+
+}
+
+void MainWindow::on_actionFuzzer_triggered()
+{
+    ui->stackedWidget->setCurrentIndex(5);
+}
+
+
+void MainWindow::on_btnFuzzer_clicked()
+{
+    QFileDialog *fileDialog = new QFileDialog(this); // 定义文件对话框类
+    fileDialog->setWindowTitle(QStringLiteral("选中文件")); // 定义文件对话框标题
+    fileDialog->setDirectory(".");  // 设置默认文件路径
+    fileDialog->setNameFilter(tr("File(*.*)")); // 设置文件过滤器
+    //fileDialog->setFileMode(QFileDialog::ExistingFiles); // 设置可以选择多个文件,默认为只能选择一个文件QFileDialog::ExistingFiles
+    fileDialog->setViewMode(QFileDialog::Detail); // 设置视图模式
+    QStringList fileNames;
+    if (fileDialog->exec()) {
+        fileNames = fileDialog->selectedFiles();
+    } else {
+        return ;
+    }
+    QString fuzzer_path(fileNames[0]);
+    ui->leFuzzer->setText(fuzzer_path);
+    QFile file(fuzzer_path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        // TODO : Warn & Update StatusBar
+        return;
+    }
+    QString qstr = file.readAll();
+    string str = qstr.toStdString();
+    file.close();
+
+    ui->teFuzzer->setText(qstr);
+    ui->teFuzzerInfo->clear();
+    for (int i = 0; i < 16; ++i) {
+      bool value = i & 1;
+      bool func = i & 2;
+      bool newline = i & 4;
+      bool order = i & 8;
+      string tmp;
+      fuzzer(tmp, str, value, func, newline, order);
+      auto qlist = fuzzer_path.split(".");
+      QString file_path = qlist[0];
+      if (value) file_path += "_更改变量名";
+      if (func) file_path += "_更改函数名";
+      if (newline) file_path += "_增加空行";
+      if (order) file_path += "_改变代码块顺序";
+      file_path = file_path + "." + qlist[1];
+      QFile file(file_path);
+      if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+          // TODO : Warn & Update StatusBar
+          return;
+      }
+      file.write(tmp.c_str());
+      ui->teFuzzerInfo->append(file_path+"写入成功");
     }
 
 }

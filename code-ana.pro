@@ -12,6 +12,7 @@ SOURCES += \
     kernel/calc_similarity.cc \
     kernel/cfg_dfs.cc \
     kernel/func_scanner.cc \
+    kernel/fuzzer.cc \
     kernel/lexical_analyzer.cc \
     kernel/util/trie.cc \
     kernel/util/type.cc \
@@ -23,6 +24,7 @@ HEADERS += \
     kernel/calc_similarity.h \
     kernel/cfg_dfs.h \
     kernel/func_scanner.h \
+    kernel/fuzzer.h \
     kernel/lexical_analyzer.h \
     kernel/util/trie.h \
     kernel/util/type.h \
