@@ -43,6 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     setWindowState(Qt::WindowMaximized);
 
+    ui->toolBar->setFixedHeight(40);
+
     // Copyright
     statusBar()->addPermanentWidget(new QLabel("Copyright © 2020 u201814846.    ", this));
 
@@ -94,6 +96,8 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
         CalcTokensSimlarity(src_tokens, dst_tokens, kHOM_TOKENMINSIZE, src_pos, dst_pos, len);
 
         size_t len_sum = 0;
+        int dst_tokens_size = dst_tokens.size();
+        int last = 0;
         auto size = dst_pos.size();
         if (dst_pos.size()) {
             info_buf.append("  相似代码块: \n");
@@ -102,19 +106,20 @@ void MainWindow::HomologyDetectionThread(QString hom_dst_path, int mode) {
                                 ", 源文件行：" + NUM2QS(src_pos[i] + 1) +
                                 ", 行数： " + NUM2QS(len[i]) + "\n");
                 len_sum += len[i];
+                int now = dst_pos[i];
+                for (int j = last; j < now; ++j) if (dst_tokens[j].empty()) dst_tokens_size--;
+                last = now + len[i];
             }
+            for (int j = last; j < dst_tokens.size(); ++j) if (dst_tokens[j].empty()) dst_tokens_size--;
         }
         double rate = 0;
         //qDebug() << len_sum << dst_tokens.size();
-        int dst_tokens_size = 0;
-        for (auto &token : dst_tokens)
-                if (!token.empty()) dst_tokens_size++;
         if (dst_tokens_size) {
             rate = 100 * ((double)len_sum / dst_tokens_size);
             if (rate > 100) rate = 100;
         }
         //qDebug() << rate;
-        info_buf.append("  相似度（Token）: " + NUM2QS(rate, 'f', 1) + "%\n\n");
+        info_buf.append(NUM2QS(dst_tokens_size)+"  相似度（Token）: " + NUM2QS(rate, 'f', 1) + "%\n\n");
         //qDebug() << hom_dst_path;
     }
 
@@ -379,8 +384,6 @@ void MainWindow::on_actionFuncScan_triggered()
     ui->stackedWidget->setCurrentIndex(3);
 }
 
-
-
 void MainWindow::on_btnFunPath_clicked()
 {
     QFileDialog *fileDialog = new QFileDialog(this); // 定义文件对话框类
@@ -511,8 +514,9 @@ void MainWindow::on_btnVulnPath_clicked()
             //qDebug() << func_type[i] << vuln_func[func_type[i]].c_str() << vuln_func.size();
             size_t now_i = pos[i];
             line_cnt += count(str_it + line_i, str_it + now_i, '\n');
+            int col = now_i - str.find_last_of('\n', now_i);
             line_i = now_i;
-            QString temp = "偏移：" + NUM2QS(now_i) + "，行号：" + NUM2QS(line_cnt);
+            QString temp = "偏移：" + NUM2QS(now_i) + "，行号：" + NUM2QS(line_cnt) + "，列号：" + NUM2QS(col);
             if (func_type[i]) temp += "，函数：" + functype2qstr[func_type[i]];
             temp += "，危险等级：" + errlevel2qstr[errlevel[i]];
             if (errlevel[i] > LOW) temp += "， 漏洞类型：" + errtype2qstr[errtype[i]];
@@ -527,7 +531,6 @@ void MainWindow::on_actionFuzzer_triggered()
 {
     ui->stackedWidget->setCurrentIndex(5);
 }
-
 
 void MainWindow::on_btnFuzzer_clicked()
 {

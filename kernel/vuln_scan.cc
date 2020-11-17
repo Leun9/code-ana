@@ -141,16 +141,18 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         } else { \
             for (size_t i = 0; i < fmt_types.size(); ++i) { \
                 if (types[i+1+MAGIC] != VALUE) {PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
+                if (value2info.count(args[i+1+MAGIC]) == 0) continue; \
+                if (value2info[args[i+1+MAGIC]].empty()) continue; \
                 auto vinfo = value2info[args[i+1+MAGIC]].top(); \
                 /* FMT_p : is_pointer; FMT_s : char && is_pointer */ \
                 if (vinfo->is_pointer_ || vinfo->is_array_) { \
                     if (fmt_types[i] == FMT_p) continue; \
                     if (fmt_types[i] == FMT_s && vinfo->type_ == CHAR) continue; \
-                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配:"+vinfo->name_, HIGH, FORMATSTR); \
                 } \
                 int key = CAT8(fmt_types[i], CAT4(vinfo->unsigned_, vinfo->type_)); \
                 if (format_type_set.find(key) == format_type_set.end()){ \
-                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配", HIGH, FORMATSTR); \
+                    PUSHFUNCVULN(start, "格式化字符串参数类型不匹配:"+vinfo->name_, HIGH, FORMATSTR); \
                 } \
             } \
         } \
@@ -173,7 +175,7 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
             for (size_t i = 0; i < fmt_types.size(); ++i) { \
                 string vi_str = args[i+1+MAGIC].substr(1); \
                 auto it = value2info.find(vi_str); \
-                if (it == value2info.end()) {PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
+                if (it == value2info.end() || it->second.empty()) {PUSHFUNCVULN(start, "可能存在漏洞", UNKNOWNLEVEL, FORMATSTR); continue;} \
                 auto vinfo = it->second.top(); \
                 /* FMT_p : is_pointer; FMT_s : char && is_pointer */ \
                 if (vinfo->is_pointer_ || vinfo->is_array_) { \
@@ -200,8 +202,9 @@ void GetPrintFormatArg(string const &str, vector<int> &types) {
         if (j == str_tmp.size()) break; \
         size_t start_tmp = j; \
         while (j < str_tmp.size() && ISIDCHAR(str_tmp[j])) ++j; \
+        if (0)if (str_tmp[j] == '(') {while (j < str_tmp.size() && str_tmp[j] != ')') ++j;} \
         auto vit = value2info.find(str_tmp.substr(start_tmp, j-start_tmp)); \
-        if (vit != value2info.end()) { \
+        if (vit != value2info.end() && !vit->second.empty()) { \
             auto vinfo = vit->second.top(); \
             if (vinfo->unsigned_ != true) \
                 PUSHFUNCVULN(start, "敏感函数参数的隐式转换可能导致符号溢出漏洞:"+vinfo->name_, MIDDLE, SIGNOF); \
@@ -226,11 +229,10 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
   int deep = 0;
   for (size_t i = func_start; i < func_end;) {
 
-   //qDebug() << "[INFO0]" << i << str[i];
     while (!ISIDCHAR(str[i]) && i < func_end) {
-        //qDebug() << vinfo_it->name_.c_str() << vinfo_it->start_;
         while (vinfo_it != value_infos.end() && i >= vinfo_it->start_) {
-            //qDebug() << vinfo_it->name_.c_str();
+            //for (auto &i : value2info) qDebug() << i.first.c_str() << i.second.size();
+            //qDebug() << "[INFO]" <<  value2info[vinfo_it->name_].size();
             value2info[vinfo_it->name_].push(&*vinfo_it);
             ++vinfo_it;
         }
@@ -253,9 +255,13 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
         } else if (str[i] == '}') { // 更新valuemap
             --deep;
             for (auto it = vinfo_it; ; --it) {
-                if (it->deep_ == deep+1) value2info[it->name_].pop();
-                if (it->deep_ < deep) break;
                 if (it == value_infos.begin()) break;
+                if (it->deep_ < deep) break;
+                if (it->deep_ == deep+1)
+                    if (value2info.count(it->name_))
+                        if (!value2info[it->name_].empty())
+                                value2info[it->name_].pop();
+                //qDebug() << value2info[it->name_].size();
             }
         } else if (str[i] == '=') { // 宽度溢出：赋值符号右边有宽度大于左边的变量
             size_t j = i;
@@ -264,10 +270,12 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
             while (ISIDCHAR(str[start])) --start;
             auto lvit = value2info.find(str.substr(start+1, j-start));
             if (lvit == value2info.end()) {++i; continue;}
-            auto lvinfo = lvit->second.top(); // FIXME
+            if (lvit->second.empty()) {++i; continue;}
+            auto lvinfo = lvit->second.top();
 
             if (str[i-1] != '>' && str[i-1] != '<' && str[i+1] != '=') {
                 while (true) {
+                    //qDebug()<<"HERE0";
                     while (!ISIDBEGIN(str[i]) && str[i] != ',' && str[i] != ';') {
                         if (str[i] == '*' && str[i+1] == ' ') {
                             PUSHVULN(i, "可能存在运算溢出（乘法）漏洞", LOW, WIDTHOF);
@@ -283,7 +291,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
                         continue;
                     }
                     auto vit = value2info.find(str.substr(start, i-start));
-                    if (vit != value2info.end()) {
+                    if (vit != value2info.end() && !vit->second.empty()) {
                         auto vinfo = vit->second.top();
                         if ((size_t)vinfo->width_ > type2size[lvinfo->type_]) {
                             PUSHVULN(start, "可能存在宽度溢出漏洞", LOW, WIDTHOF);
@@ -301,11 +309,11 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
         ++i;
     }
 
-   //qDebug() << "[INFO1]"  << i << str[i];
+    //qDebug() << "[INFO1]" << i << str.substr(i,10).c_str();
     size_t start = i;
     Trie::TrieNode* now = buf_vuln_trie.root_;
     while (buf_vuln_trie.Jump(now, str[i])) ++i;
-    //qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
+   // qDebug() << "[INFO2]"  << i << str.substr(i,10).c_str() << now << now->is_leaf_;
 
     if (now->is_leaf_ && !ISIDCHAR(str[i])) {
         vector<string> args;
@@ -434,8 +442,9 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
 
         } break;
         case PRINTF: {
+            //qDebug() << "HERE0";
             CHECK_PRINT_FMT(0);
-
+            //qDebug() << "HERE1";
         } break;
         case FPRINTF:
         case SPRINTF: {
@@ -457,7 +466,7 @@ void BufVulnScan(vector<int> &pos, vector<int> &func_type, vector<string> &info,
     } else {
         while (ISIDCHAR(str[i])) ++i;
     }
-   //qDebug() << "[INFO3]"  << i << str[i];
+    //qDebug() << "[INFO3]" << i << str.substr(i,10).c_str();
 
   }
 }

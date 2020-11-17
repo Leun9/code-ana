@@ -72,6 +72,7 @@ namespace kernel {
 
 unordered_set<string> LexicalAnalyzer::keywords_({KEYWORDS});
 vector<string> LexicalAnalyzer::keep_chars_({KEEPCHARS});
+
 vector<string> LexicalAnalyzer::decode_({KEYWORDS, KEEPCHARS, EXTENSION});
 unordered_map<string, int> LexicalAnalyzer::encode_(256);
 

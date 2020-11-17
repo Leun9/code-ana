@@ -14,25 +14,20 @@ namespace kernel {
 namespace util {
 
 struct Trie {
-
   struct TrieNode {
     unordered_map<char, TrieNode*> next_;
     bool is_leaf_;
     int leaf_num_;
-
-    TrieNode() : is_leaf_(0) {};
-    TrieNode(bool is_leaf) : is_leaf_(is_leaf) {}
+    TrieNode(bool is_leaf=0) : is_leaf_(is_leaf) {}
   };
 
   Trie(const std::initializer_list<string> &lst);
-  ~Trie() {}; // TODO
 
   bool Jump(TrieNode* &now, char ch);
   void Insert(string str);
 
   TrieNode* root_;
   int leaf_cnt_;
-
 };
 
 } // util

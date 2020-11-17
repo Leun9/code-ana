@@ -11,7 +11,7 @@ long long v5;
 double v6;
 float v7;
 unsigned long long v8;
-char *v9[100];
+char *v9[100], *p;
 unsigned char v10;
 
 void f1() { // 测试部分函数
@@ -78,7 +78,7 @@ void f4() { // 测试重名变量
 
 void f5() { // 测试堆溢出/栈溢出
   char str[10];
-  unsigned char *p;
+  char *p;
   memcpy(str, v2, 12);
   p = str;
   memcpy(p, v2, 12);
@@ -106,7 +106,7 @@ void f6() { // 测试printf
   printf("%d", y+1);
   char ch;
   float flo;
-  fprintf(temp, "%llx%*f%lld", y, x, flo, y);
+  fprintf(stdout, "%llx%*f%lld", y, x, flo, y);
   sprintf(temp, "%llx%*f%lld", y, ch, flo, y);
   scanf("%c", &ch);
   scanf("%lld", &y, &ch);
@@ -128,7 +128,7 @@ void f8() {
   int aaaaa;
   unsigned int bbbbb;
   aaaaa = bbbbb;
-  int ddddd = (aaaaa * 128) >> 1;
+  int ddddd = (aaaaa *128)>>1;
   unsigned int ccccc = aaaaa;
   memcpy(p, v2, aaaaa);
   memcpy(p, v2, ccccc);

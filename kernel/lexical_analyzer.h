@@ -39,22 +39,23 @@ namespace kernel {
   "KNUM_", "KCHAR_", "KSTR_", "ID_", "COMMENT_"
 
 
-// FIXME : cannot great process "typedef" and "define"
 class LexicalAnalyzer {
 
  private:
   struct Node {
     Node() {memset(edges, 0, sizeof(Node*)*256);};
     Node* edges[256];
-    //unordered_map<char, Node*> edges;
   };
 
  public:
   //LexicalAnalyzer();
+
   static void Init();
   static void GetStringTokens(vector<string>& result, const string&);
-  static void GetStringFuncTokens(unordered_map<string, string> &func2tokens, unordered_map<string, pair<size_t, size_t>> &func_pos,
-                                  unordered_map<string, vector<string>> &func2subfunc, string&);
+  static void GetStringFuncTokens(unordered_map<string, string> &func2tokens,
+                                  unordered_map<string, pair<size_t, size_t>> &func_pos,
+                                  unordered_map<string, vector<string>> &func2subfunc,
+                                  string&);
   static void PrintTokens(FILE*, const vector<string>& result);
   static void DecodeTokens(string &, const vector<string>& result);
 

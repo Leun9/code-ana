@@ -113,6 +113,8 @@ if (deep == 0)  {
     do {++i;} while (ISBLANK(str[i]));
     if (str[i] != ')') {
         while (true) {
+            bool isp = 0;
+            bool isa = 0;
             while (!ISIDCHAR(str[i])) ++i;
             size_t type_start = i;
             do {++i;} while (str[i] != ',' && str[i] != ')');
